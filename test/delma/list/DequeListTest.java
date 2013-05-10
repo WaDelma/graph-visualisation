@@ -161,4 +161,30 @@ public class DequeListTest {
         assertTrue(arrayList.isEmpty());
         assertEquals(0, arrayList.size());
     }
+    
+    @Test()
+    public void addingToEndWorks(){
+        for(int n = 0; n < DequeList.DEFAULT_CAPACITY; n++){
+            emptyList.add(n);
+        }
+        for(int n = 0; n < DequeList.DEFAULT_CAPACITY; n++){
+            assertEquals(n, emptyList.get(n));
+        }
+        emptyList.add("o");
+        assertEquals("o", emptyList.getLast());
+        assertTrue(emptyList.capacity() > DequeList.DEFAULT_CAPACITY);
+    }
+    
+    @Test()
+    public void addingToStartWorks(){
+        for(int n = 0; n < DequeList.DEFAULT_CAPACITY; n++){
+            emptyList.addFirst(n);
+        }
+        for(int n = 0; n < DequeList.DEFAULT_CAPACITY; n++){
+            assertEquals(DequeList.DEFAULT_CAPACITY - 1 - n, emptyList.get(n));
+        }
+        emptyList.addFirst("o");
+        assertEquals("o", emptyList.getFirst());
+        assertTrue(emptyList.capacity() > DequeList.DEFAULT_CAPACITY);
+    }
 }

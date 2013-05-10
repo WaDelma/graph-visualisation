@@ -1,0 +1,8 @@
+Verkon visualisoija
+
+Työn tarkoituksena on luoda verkkoalgoritmeja graafisesti havannollistava ohjelma.
+Työssä toteutan verkkoalgoritmeja ja niihin tarvittavia tietorakenteita: jono, pino, keko, union-find, etc. ja tietenkin itse verkkorakenteen.
+Syötteenä ohjelma saa verkon, jonka käyttäjä syöttää. Jos aikaa riittää niin se myös tallentaa ja lukee verkkoja tiedostosta.
+Saadun verkon ohjelma piirtää näytölle ja antaa käyttäjän valita erillaisia verkkoalgoritmeja sen läpikäyntiin.
+Ohjelma mahdollistaa myös, algoritmista riippuen, parametrien annon, kuten esimerkiksi sen mistä läpikäynti aloitetaan.
+Tavoitteena ei ole välttämättä toteuttaa tehokkaimpia mahdollisia algoritmeja vaan auttaa algoritmien ja verkon rakenteen havainnollistamisessa, mutta algoritmien nopeuttaminen on aina plussaa ja tavoittelun arvoista.
