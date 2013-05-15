@@ -59,10 +59,7 @@ public class DequeList<E> implements Deque<E>, List<E>, RandomAccess, Cloneable,
             empty = false;
             return;
         }
-        int i = first - 1;
-        if (i < 0) {
-            i = data.length - 1;
-        }
+        int i = modData(first - 1);
         if (i == last) {
             ensureCapacity();
             i = first;
@@ -78,10 +75,7 @@ public class DequeList<E> implements Deque<E>, List<E>, RandomAccess, Cloneable,
             empty = false;
             return;
         }
-        int i = last + 1;
-        if (i >= data.length) {
-            i = 0;
-        }
+        int i = modData(last + 1);
         if (first == i) {
             ensureCapacity();
             i = last;
@@ -116,10 +110,7 @@ public class DequeList<E> implements Deque<E>, List<E>, RandomAccess, Cloneable,
         Object o = data[first];
         data[first] = null;
         if (first != last) {
-            first++;
-            if (first >= data.length) {
-                first = 0;
-            }
+            first = modData(first + 1);
         } else {
             empty = true;
         }
@@ -134,10 +125,7 @@ public class DequeList<E> implements Deque<E>, List<E>, RandomAccess, Cloneable,
         Object o = data[last];
         data[last] = null;
         if (first != last) {
-            last--;
-            if (last < 0) {
-                last = data.length - 1;
-            }
+            last = modData(last - 1);
         } else {
             empty = true;
         }
@@ -403,11 +391,7 @@ public class DequeList<E> implements Deque<E>, List<E>, RandomAccess, Cloneable,
         if (index < 0 || index > size()) {
             throw new IndexOutOfBoundsException();
         }
-        int i = first + index;
-        if (i >= data.length) {
-            i -= data.length;
-        }
-        return (E) data[i];
+        return (E) data[modData(first + index)];
     }
 
     @Override
@@ -415,10 +399,7 @@ public class DequeList<E> implements Deque<E>, List<E>, RandomAccess, Cloneable,
         if (index < 0 || index > size()) {
             throw new IndexOutOfBoundsException();
         }
-        int i = first + index;
-        if (i >= data.length) {
-            i -= data.length;
-        }
+        int i = modData(first + index);
         Object temp = data[i];
         data[i] = element;
         return (E) temp;
@@ -434,10 +415,7 @@ public class DequeList<E> implements Deque<E>, List<E>, RandomAccess, Cloneable,
         if (index < 0 || index > size()) {
             throw new IndexOutOfBoundsException();
         }
-        int i = first + index;
-        if (i >= data.length) {
-            i -= last;
-        }
+        int i = modData(first + index);
         Object o = data[i];
         if (first > last) {
             for (int j = i + 1; j < data.length; j++) {
@@ -454,10 +432,7 @@ public class DequeList<E> implements Deque<E>, List<E>, RandomAccess, Cloneable,
         }
         data[last] = null;
         if (first != last) {
-            last--;
-            if (last < 0) {
-                last = data.length - 1;
-            }
+            last = modData(last - 1);
         } else {
             empty = true;
         }
@@ -541,6 +516,15 @@ public class DequeList<E> implements Deque<E>, List<E>, RandomAccess, Cloneable,
         data = temp;
     }
 
+    private int modData(int i) {
+        int result = i % data.length;
+        return result < 0 ? result + data.length : result;
+    }
+
+    
+    /*
+     * TODO: Doesn't work inverted.
+     */
     private class DequeListIterator implements ListIterator<E> {
 
         private int cursor;
@@ -564,19 +548,18 @@ public class DequeList<E> implements Deque<E>, List<E>, RandomAccess, Cloneable,
 
         @Override
         public boolean hasNext() {
-            return cursor != end;
+            return cursor - amount != end;
         }
 
         @Override
         public E next() {
             checkForComodification();
-            if (cursor == last) {
+            if (cursor - amount == end) {
                 throw new ConcurrentModificationException();
             }
             Object result = data[cursor];
             next = true;
-            cursor += amount;
-            cursor = cursor % data.length;
+            cursor = modData(cursor + amount);
             return (E) result;
         }
 
@@ -600,15 +583,14 @@ public class DequeList<E> implements Deque<E>, List<E>, RandomAccess, Cloneable,
 
         @Override
         public boolean hasPrevious() {
-           return cursor != start;
+            return cursor != start;
         }
 
         @Override
         public E previous() {
             checkForComodification();
-            cursor -= amount;
-            cursor = cursor % data.length;
-            if (cursor == first) {
+            cursor = modData(cursor - amount);
+            if (cursor == start) {
                 throw new ConcurrentModificationException();
             }
             Object result = data[cursor];
@@ -619,7 +601,7 @@ public class DequeList<E> implements Deque<E>, List<E>, RandomAccess, Cloneable,
         @Override
         public int nextIndex() {
             int result = cursor - first;
-            if(result < 0){
+            if (result < 0) {
                 return size() - first + cursor;
             }
             return result;

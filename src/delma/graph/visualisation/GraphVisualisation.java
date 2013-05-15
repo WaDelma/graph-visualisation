@@ -3,8 +3,11 @@ package delma.graph.visualisation;
 import delma.graph.Graph;
 import delma.graph.Node;
 import delma.graph.Vertex;
+import delma.list.DequeList;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 
 /**
  *
@@ -16,6 +19,16 @@ public class GraphVisualisation {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        DequeList list = new DequeList();
+        list.add(0);
+        list.add(1);
+        list.add(2);
+        list.add(3);
+        for (Iterator it = list.descendingIterator(); it.hasNext();) {
+            Object o = it.next();
+            System.out.print(o);
+        }
+        System.out.println(Arrays.toString(list.toArray()));
         GraphVisualisation instance = new GraphVisualisation();
         instance.add("A");
         instance.add("B");
