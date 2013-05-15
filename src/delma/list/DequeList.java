@@ -55,7 +55,7 @@ public class DequeList<E> implements Deque<E>, List<E>, RandomAccess, Cloneable,
     @Override
     public void addFirst(E e) {
         if (isEmpty()) {
-            data[first] = 0;
+            data[first] = e;
             empty = false;
             return;
         }
@@ -74,7 +74,7 @@ public class DequeList<E> implements Deque<E>, List<E>, RandomAccess, Cloneable,
     @Override
     public void addLast(E e) {
         if (isEmpty()) {
-            data[last] = 0;
+            data[last] = e;
             empty = false;
             return;
         }
@@ -195,7 +195,7 @@ public class DequeList<E> implements Deque<E>, List<E>, RandomAccess, Cloneable,
     @Override
     public boolean removeFirstOccurrence(Object o) {
         for (Iterator<E> it = this.iterator(); it.hasNext();) {
-            if(o.equals(it.next())){
+            if (o.equals(it.next())) {
                 it.remove();
                 return true;
             }
@@ -206,7 +206,7 @@ public class DequeList<E> implements Deque<E>, List<E>, RandomAccess, Cloneable,
     @Override
     public boolean removeLastOccurrence(Object o) {
         for (Iterator<E> it = this.descendingIterator(); it.hasNext();) {
-            if(o.equals(it.next())){
+            if (o.equals(it.next())) {
                 it.remove();
                 return true;
             }
@@ -306,24 +306,35 @@ public class DequeList<E> implements Deque<E>, List<E>, RandomAccess, Cloneable,
     @Override
     public Object[] toArray() {
         Object[] result = new Object[size()];
-        if (first > last) {
-            System.arraycopy(data, first, result, 0, data.length - first);
-            System.arraycopy(data, 0, result, data.length - first + 1, last);
-        } else {
-            System.arraycopy(data, first, result, 0, size());
+        int i = 0;
+        for (Iterator<E> it = this.iterator(); it.hasNext();) {
+            result[i] = it.next();
+            i++;
         }
         return result;
     }
 
     @Override
     public <T> T[] toArray(T[] a) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (a.length >= size()) {
+            int i = 0;
+            for (Iterator<E> it = this.iterator(); it.hasNext();) {
+                if (i < size()) {
+                    a[i] = (T) it.next();
+                } else {
+                    a[i] = null;
+                }
+                i++;
+            }
+            return a;
+        }
+        return (T[]) toArray();
     }
 
     @Override
     public boolean containsAll(Collection<?> c) {
         for (Object o : c) {
-            if(!contains(o)){
+            if (!contains(o)) {
                 return false;
             }
         }
@@ -332,7 +343,12 @@ public class DequeList<E> implements Deque<E>, List<E>, RandomAccess, Cloneable,
 
     @Override
     public boolean addAll(Collection<? extends E> c) {
-        //TODO: Can be made better with array copying
+        /*
+         * TODO: Can be done better.
+         */
+        if (c.isEmpty()) {
+            return false;
+        }
         for (E e : c) {
             add(e);
         }
@@ -341,10 +357,9 @@ public class DequeList<E> implements Deque<E>, List<E>, RandomAccess, Cloneable,
 
     @Override
     public boolean removeAll(Collection<?> c) {
-        //TODO: Removing this way does too much moving of objects. 
         boolean flag = false;
         for (Object e : c) {
-            if(remove(e)){
+            if (remove(e)) {
                 flag = true;
             }
         }
@@ -353,7 +368,16 @@ public class DequeList<E> implements Deque<E>, List<E>, RandomAccess, Cloneable,
 
     @Override
     public boolean retainAll(Collection<?> c) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        DequeList temp = new DequeList(c.size());
+        for (Object e : c) {
+            if (contains(e)) {
+                temp.add(e);
+            }
+        }
+        int i = size();
+        clear();
+        addAll(temp);
+        return size() != i;
     }
 
     @Override
@@ -365,7 +389,13 @@ public class DequeList<E> implements Deque<E>, List<E>, RandomAccess, Cloneable,
 
     @Override
     public boolean addAll(int index, Collection<? extends E> c) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (c.isEmpty()) {
+            return false;
+        }
+        for (E e : c) {
+            add(index, e);
+        }
+        return true;
     }
 
     @Override
@@ -382,7 +412,16 @@ public class DequeList<E> implements Deque<E>, List<E>, RandomAccess, Cloneable,
 
     @Override
     public E set(int index, E element) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (index < 0 || index > size()) {
+            throw new IndexOutOfBoundsException();
+        }
+        int i = first + index;
+        if (i >= data.length) {
+            i -= data.length;
+        }
+        Object temp = data[i];
+        data[i] = element;
+        return (E) temp;
     }
 
     @Override
@@ -473,12 +512,15 @@ public class DequeList<E> implements Deque<E>, List<E>, RandomAccess, Cloneable,
 
     @Override
     public ListIterator<E> listIterator() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return new DequeListIterator(first, last, 1);
     }
 
     @Override
     public ListIterator<E> listIterator(int index) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (index < 0 || index > size()) {
+            throw new IndexOutOfBoundsException();
+        }
+        return new DequeListIterator(first + index, last, 1);
     }
 
     @Override
@@ -499,16 +541,17 @@ public class DequeList<E> implements Deque<E>, List<E>, RandomAccess, Cloneable,
         data = temp;
     }
 
-    private class DequeListIterator implements Iterator<E> {
+    private class DequeListIterator implements ListIterator<E> {
 
         private int cursor;
         private int expected;
         private boolean next;
         private final int amount;
-        private final int end;
+        private final int start, end;
 
         public DequeListIterator(int start, int end, int amount) {
             cursor = start;
+            this.start = start;
             this.end = end;
             this.amount = amount;
             expected = last - first;
@@ -553,6 +596,48 @@ public class DequeList<E> implements Deque<E>, List<E>, RandomAccess, Cloneable,
             if (size() != expected) {
                 throw new ConcurrentModificationException();
             }
+        }
+
+        @Override
+        public boolean hasPrevious() {
+           return cursor != start;
+        }
+
+        @Override
+        public E previous() {
+            checkForComodification();
+            cursor -= amount;
+            cursor = cursor % data.length;
+            if (cursor == first) {
+                throw new ConcurrentModificationException();
+            }
+            Object result = data[cursor];
+            next = true;
+            return (E) result;
+        }
+
+        @Override
+        public int nextIndex() {
+            int result = cursor - first;
+            if(result < 0){
+                return size() - first + cursor;
+            }
+            return result;
+        }
+
+        @Override
+        public int previousIndex() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void set(E e) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public void add(E e) {
+            throw new UnsupportedOperationException("Not supported yet.");
         }
     }
 }
