@@ -5,6 +5,7 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.NoSuchElementException;
 
 /**
  * List and Deque in one data structure. This one is implemented with Array.
@@ -211,7 +212,7 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
 
     @Override
     public boolean containsAll(Collection<?> c) {
-        for (Object o : c) {
+        for (E o : (Collection<E>)c) {
             if (!contains(o)) {
                 return false;
             }
@@ -236,8 +237,8 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
     @Override
     public boolean removeAll(Collection<?> c) {
         boolean flag = false;
-        for (Object e : c) {
-            if (remove(e)) {
+        for (E o : (Collection<E>)c) {
+            if (remove(o)) {
                 flag = true;
             }
         }
@@ -247,9 +248,9 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
     @Override
     public boolean retainAll(Collection<?> c) {
         ArrayDequeList temp = new ArrayDequeList(c.size());
-        for (Object e : c) {
-            if (contains(e)) {
-                temp.add(e);
+        for (E o : (Collection<E>)c) {
+            if (contains(o)) {
+                temp.add(o);
             }
         }
         int i = size();
@@ -433,7 +434,7 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
         public E next() {
             checkForComodification();
             if (noNext) {
-                throw new ConcurrentModificationException();
+                throw new  NoSuchElementException();
             }
             noNext = cursor == end;
             noPrev = false;
@@ -470,7 +471,7 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
         public E previous() {
             checkForComodification();
             if (noPrev) {
-                throw new ConcurrentModificationException();
+                throw new  NoSuchElementException();
             }
             noPrev = cursor == start;
             noNext = false;

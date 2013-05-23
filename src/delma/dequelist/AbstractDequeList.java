@@ -6,6 +6,7 @@ import java.util.NoSuchElementException;
 
 /**
  * Use this to simplify some of same doing methods in List and Deque interfaces.
+ *
  * @author Antti
  */
 public abstract class AbstractDequeList<E> implements List<E>, Deque<E> {

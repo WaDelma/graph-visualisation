@@ -1,6 +1,7 @@
-package map;
+package delma.map;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -14,7 +15,8 @@ public class MyMap<K, V> implements Map<K, V> {
     private Entry[] data;
     private int size;
     private double load;
-    private final double DEFAULT_LOAD_FACTOR = 0.66;
+    private final static double DEFAULT_LOAD_FACTOR = 0.66;
+    private final static int DEFAULT_STARTING_SIZE = 64;
 
     /**
      * Create new one with custom load factor.
@@ -26,6 +28,7 @@ public class MyMap<K, V> implements Map<K, V> {
             throw new IllegalArgumentException();
         }
         load = loadFactor;
+        data = new Entry[DEFAULT_STARTING_SIZE];
     }
 
     /**
@@ -34,7 +37,7 @@ public class MyMap<K, V> implements Map<K, V> {
      * @param loadFactor
      */
     public MyMap() {
-        load = DEFAULT_LOAD_FACTOR;
+        this(DEFAULT_LOAD_FACTOR);
     }
 
     @Override
@@ -49,7 +52,7 @@ public class MyMap<K, V> implements Map<K, V> {
 
     @Override
     public boolean containsKey(Object key) {
-        return get(key) != null;
+        return get((K)key) != null;
     }
 
     @Override
@@ -170,7 +173,7 @@ public class MyMap<K, V> implements Map<K, V> {
         Entry[] temp = new Entry[i];
         for (Entry entry : data) {
             for (Entry e = entry; e.next != null; e = e.next) {
-                int hash = getHash(entry.key, temp.length);
+                int hash = getHash(entry.key, i);
                 if (temp[hash] != null) {
                     e.next = temp[hash];
                 } else {

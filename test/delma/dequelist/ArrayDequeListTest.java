@@ -1,12 +1,10 @@
 package delma.dequelist;
 
-import delma.dequelist.ArrayDequeList;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *
