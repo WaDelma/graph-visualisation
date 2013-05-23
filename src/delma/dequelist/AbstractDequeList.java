@@ -1,15 +1,15 @@
 package delma.dequelist;
 
+import delma.list.AbstractList;
 import java.util.Deque;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
- * Use this to simplify some of same doing methods in List and Deque interfaces.
+ * This is to simplify some of equivalent methods in List and Deque interfaces.
  *
  * @author Antti
  */
-public abstract class AbstractDequeList<E> implements List<E>, Deque<E> {
+public abstract class AbstractDequeList<E> extends AbstractList<E> implements Deque<E> {
 
     @Override
     public boolean offerFirst(E e) {

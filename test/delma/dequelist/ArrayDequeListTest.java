@@ -1,6 +1,7 @@
 package delma.dequelist;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -138,5 +139,57 @@ public class ArrayDequeListTest {
             temp.remove(0);
             assertArrayEquals(temp.toArray(), emptyList.toArray());
         }
+    }
+
+    @Test()
+    public void addingManyWorks() {
+        for (int i = 0; i < 1000; i++) {
+            emptyList.addLast(i);
+        }
+        for (int i = 0; i < 1000; i++) {
+            assertEquals(i, emptyList.get(i));
+        }
+        assertEquals(1000, emptyList.size());
+
+        emptyList.clear();
+
+        for (int i = 0; i < 1000; i++) {
+            emptyList.addFirst(i);
+        }
+        for (int i = 0; i < 1000; i++) {
+            assertEquals(999 - i, emptyList.get(i));
+        }
+        assertEquals(1000, emptyList.size());
+    }
+
+    @Test()
+    public void addingToCertainIndex() {
+        arrayList.add(1, "O");
+        assertEquals("O", arrayList.get(1));
+
+        assertEquals(4, arrayList.size());
+
+        assertEquals("B", arrayList.get(2));
+        assertEquals("C", arrayList.get(3));
+    }
+
+    @Test()
+    public void subListWorks() {
+        arrayList.add("E");
+        arrayList.subList(1, 3).clear();
+        assertArrayEquals(new Object[]{"A", "E"}, arrayList.toArray());
+        try {
+            arrayList.subList(1, 4);
+            fail("Allows creation of sublists greater than size of list.");
+        } catch (IndexOutOfBoundsException e) {
+        }
+        try {
+            arrayList.subList(1, 2).get(2);
+            fail("Allows access to outside of sublist.");
+        } catch (IndexOutOfBoundsException e) {
+            
+        }
+        arrayList.subList(1, 2).add("O");
+        assertEquals("O", arrayList.get(1));
     }
 }

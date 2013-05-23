@@ -1,5 +1,6 @@
 package delma.dequelist;
 
+import delma.list.AbstractList;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
@@ -8,7 +9,7 @@ import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
 /**
- * List and Deque in one data structure. This one is implemented with Array.
+ * List and Deque in one data structure. This one is implemented with an Array.
  *
  * @author aopkarja
  */
@@ -68,7 +69,7 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
         int i = modData(first - 1);
         if (i == last) {
             ensureCapacity();
-            i = first;
+            i = modData(first - 1);
         }
         first = i;
         data[i] = e;
@@ -84,7 +85,7 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
         int i = modData(last + 1);
         if (first == i) {
             ensureCapacity();
-            i = last;
+            i = modData(last + 1);
         }
         last = i;
         data[i] = e;
@@ -147,16 +148,6 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
     }
 
     @Override
-    public boolean contains(Object o) {
-        for (E e : this) {
-            if (o.equals(e)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
     public int size() {
         if (isEmpty()) {
             return 0;
@@ -183,135 +174,62 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
     }
 
     @Override
-    public Object[] toArray() {
-        Object[] result = new Object[size()];
-        int i = 0;
-        for (Iterator<E> it = this.iterator(); it.hasNext();) {
-            result[i] = it.next();
-            i++;
-        }
-        return result;
-    }
-
-    @Override
-    public <T> T[] toArray(T[] a) {
-        if (a.length >= size()) {
-            int i = 0;
-            for (Iterator<E> it = this.iterator(); it.hasNext();) {
-                if (i < size()) {
-                    a[i] = (T) it.next();
-                } else {
-                    a[i] = null;
-                }
-                i++;
-            }
-            return a;
-        }
-        return (T[]) toArray();
-    }
-
-    @Override
-    public boolean containsAll(Collection<?> c) {
-        for (E o : (Collection<E>)c) {
-            if (!contains(o)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /*
-     * TODO: Can be done better.
-     */
-    @Override
-    public boolean addAll(Collection<? extends E> c) {
-        if (c.isEmpty()) {
-            return false;
-        }
-        for (E e : c) {
-            add(e);
-        }
-        return true;
-    }
-
-    @Override
-    public boolean removeAll(Collection<?> c) {
-        boolean flag = false;
-        for (E o : (Collection<E>)c) {
-            if (remove(o)) {
-                flag = true;
-            }
-        }
-        return flag;
-    }
-
-    @Override
-    public boolean retainAll(Collection<?> c) {
-        ArrayDequeList temp = new ArrayDequeList(c.size());
-        for (E o : (Collection<E>)c) {
-            if (contains(o)) {
-                temp.add(o);
-            }
-        }
-        int i = size();
-        clear();
-        addAll(temp);
-        return size() != i;
-    }
-
-    @Override
     public void clear() {
         data = new Object[DEFAULT_CAPACITY];
         first = last = 0;
         empty = true;
     }
 
-    /*
-     * TODO: Can be done better.
-     */
-    @Override
-    public boolean addAll(int index, Collection<? extends E> c) {
-        if (c.isEmpty()) {
-            return false;
-        }
-        for (E e : c) {
-            add(index, e);
-        }
-        return true;
-    }
-
     @Override
     public E get(int index) {
-        if (index < 0 || index > size()) {
-            throw new IndexOutOfBoundsException();
-        }
+        checkForBounds(index, size());
         return (E) data[modData(first + index)];
     }
 
     @Override
     public E set(int index, E element) {
-        if (index < 0 || index > size()) {
-            throw new IndexOutOfBoundsException();
-        }
+        checkForBounds(index, size());
         int i = modData(first + index);
         Object temp = data[i];
         data[i] = element;
         return (E) temp;
     }
 
-    /*
-     * TODO: implement this one
-     */
     @Override
     public void add(int index, E element) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        checkForBounds(index, size());
+        if (isEmpty()) {
+            data[first] = element;
+            empty = false;
+            return;
+        }
+        int i = modData(first + index);
+        if (i == last) {
+            ensureCapacity();
+            i = modData(first + index);
+        }
+
+        if (first > last) {
+            for (int j = last; j >= 0; j--) {
+                data[modData(j + 1)] = data[j];
+            }
+            data[0] = data[data.length - 1];
+            for (int j = data.length - 2; j >= i; j--) {
+                data[j + 1] = data[j];
+            }
+            data[i] = element;
+        } else {
+            for (int j = last; j >= i; j--) {
+                data[modData(j + 1)] = data[j];
+            }
+            data[i] = element;
+        }
+        last = modData(last + 1);
     }
 
     @Override
     public E remove(int index) {
-        if (index < 0 || index > size()) {
-            throw new IndexOutOfBoundsException();
-        }
+        checkForBounds(index, size());
         int i = modData(first + index);
         Object o = data[i];
         if (first > last) {
@@ -328,38 +246,11 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
             }
         }
         data[last] = null;
-        if (first != last) {
-            last = modData(last - 1);
-        } else {
+        last = modData(last - 1);
+        if (first == last) {
             empty = true;
         }
         return (E) o;
-    }
-
-    @Override
-    public int indexOf(Object o) {
-        int i = 0;
-        for (Iterator<E> it = this.iterator(); it.hasNext();) {
-            E temp = it.next();
-            if (o == temp || (o != null && o.equals(temp))) {
-                return i;
-            }
-            i++;
-        }
-        return -1;
-    }
-
-    @Override
-    public int lastIndexOf(Object o) {
-        int i = 1;
-        for (Iterator<E> it = this.descendingIterator(); it.hasNext();) {
-            E temp = it.next();
-            if (o == temp || (o != null && o.equals(temp))) {
-                return data.length - i;
-            }
-            i++;
-        }
-        return -1;
     }
 
     @Override
@@ -369,18 +260,26 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
 
     @Override
     public ListIterator<E> listIterator(int index) {
-        if (index < 0 || index > size()) {
-            throw new IndexOutOfBoundsException();
-        }
+        checkForBounds(index, size());
         return new DequeListIterator(first + index, last, 1);
     }
 
-    /*
-     * TODO: Implement this.
-     */
     @Override
     public List<E> subList(int fromIndex, int toIndex) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        testSubList(fromIndex, toIndex - 1, size());
+        return new SubList(fromIndex, toIndex - 1);
+    }
+
+    private void testSubList(int fromIndex, int toIndex, int size) {
+        if (fromIndex < 0) {
+            throw new IndexOutOfBoundsException(fromIndex + " < 0");
+        }
+        if (toIndex > size) {
+            throw new IndexOutOfBoundsException(toIndex + " > " + size);
+        }
+        if (fromIndex > toIndex && fromIndex != toIndex) {
+            throw new IllegalArgumentException(fromIndex + " > " + toIndex);
+        }
     }
 
     @Override
@@ -405,20 +304,108 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
         return result < 0 ? result + data.length : result;
     }
 
-    /*
-     * Iterator, Descending iterator, List iterator and Sublist iterator in same
+    private void checkForBounds(int index, int size) throws IndexOutOfBoundsException {
+        if (index < 0 || index > size) {
+            throw new IndexOutOfBoundsException();
+        }
+    }
+
+    /**
+     * List used to allow access only to part of a list.
+     */
+    private class SubList extends AbstractList<E> {
+
+        private int from;
+        private int to;
+
+        SubList(int fromIndex, int toIndex) {
+            from = fromIndex;
+            to = toIndex;
+        }
+
+        @Override
+        public int size() {
+            return to - from;
+        }
+
+        @Override
+        public Iterator<E> iterator() {
+            return new DequeListIterator(modData(first + from), modData(first + to), 1);
+        }
+
+        @Override
+        public boolean add(E e) {
+            ArrayDequeList.this.add(to, e);
+            to++;
+            return true;
+        }
+
+        @Override
+        public void clear() {
+            for (Iterator<E> it = this.iterator(); it.hasNext();) {
+                it.next();
+                it.remove();
+            }
+            from = to = 0;
+        }
+
+        @Override
+        public E get(int index) {
+            checkForBounds(index, size());
+            return ArrayDequeList.this.get(from + index);
+        }
+
+        @Override
+        public E set(int index, E element) {
+            checkForBounds(index, size());
+            return ArrayDequeList.this.set(from + index, element);
+        }
+
+        @Override
+        public void add(int index, E element) {
+            checkForBounds(index, size());
+            ArrayDequeList.this.add(from + index, element);
+        }
+
+        @Override
+        public E remove(int index) {
+            checkForBounds(index, size());
+            return ArrayDequeList.this.remove(from + index);
+        }
+
+        @Override
+        public ListIterator<E> listIterator() {
+            return new DequeListIterator(modData(first + from), modData(first + to), 1);
+        }
+
+        @Override
+        public ListIterator<E> listIterator(int index) {
+            checkForBounds(index, size());
+            return new DequeListIterator(modData(first + from + index), modData(first + to), 1);
+        }
+
+        @Override
+        public List<E> subList(int fromIndex, int toIndex) {
+            testSubList(fromIndex, toIndex - 1, size());
+            return new SubList(fromIndex, toIndex - 1);
+        }
+    }
+
+    /**
+     * Iterator, Descending iterator, List iterator and Sublist iterator in same.
      */
     private class DequeListIterator implements ListIterator<E> {
 
-        private int cursor;
+        private int cur;
         private int expected;
         private boolean next;
         private final int amount;
-        private final int start, end;
+        private  int start, end;
         private boolean noNext, noPrev;
 
-        public DequeListIterator(int start, int end, int amount) {
-            cursor = start;
+        DequeListIterator(int start, int end, int amount) {
+            noNext = noPrev = isEmpty();
+            cur = start;
             this.start = start;
             this.end = end;
             this.amount = amount;
@@ -434,13 +421,13 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
         public E next() {
             checkForComodification();
             if (noNext) {
-                throw new  NoSuchElementException();
+                throw new NoSuchElementException();
             }
-            noNext = cursor == end;
+            noNext = cur == end;
             noPrev = false;
-            Object result = data[cursor];
+            Object result = data[cur];
             next = true;
-            cursor = modData(cursor + amount);
+            cur = modData(cur + amount);
             return (E) result;
         }
 
@@ -448,7 +435,9 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
         public void remove() {
             checkForComodification();
             if (next) {
-                ArrayDequeList.this.remove(cursor);
+                cur = modData(cur - amount);
+                end = modData(end - 1);
+                ArrayDequeList.this.remove(cur);
                 next = false;
                 expected--;
             } else {
@@ -456,9 +445,9 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
             }
         }
 
-        final void checkForComodification() {
+        void checkForComodification() {
             if (size() != expected) {
-                throw new ConcurrentModificationException();
+                throw new ConcurrentModificationException(size() + " != " + expected);
             }
         }
 
@@ -471,25 +460,28 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
         public E previous() {
             checkForComodification();
             if (noPrev) {
-                throw new  NoSuchElementException();
+                throw new NoSuchElementException();
             }
-            noPrev = cursor == start;
+            noPrev = cur == start;
             noNext = false;
-            Object result = data[cursor];
+            Object result = data[cur];
             next = true;
-            cursor = modData(cursor - amount);
+            cur = modData(cur - amount);
             return (E) result;
         }
 
         @Override
         public int nextIndex() {
-            int result = cursor - first;
+            int result = cur - first;
             if (result < 0) {
-                return size() - first + cursor;
+                return size() - first + cur;
             }
             return result;
         }
 
+        /*
+         * TODO: Implement these
+         */
         @Override
         public int previousIndex() {
             throw new UnsupportedOperationException("Not supported yet.");
@@ -504,5 +496,8 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
         public void add(E e) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
+        /*
+         * TODO: Implement these
+         */
     }
 }
