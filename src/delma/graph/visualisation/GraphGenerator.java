@@ -16,7 +16,10 @@ public class GraphGenerator implements ActionListener {
         graph.clear();
         Random rand = new Random();
         for (int i = 0; i < nodes; i++) {
-            graph.addNode("" + rand.nextInt(nodes * nodes));
+            String ID = "" + rand.nextInt(nodes * nodes);
+            if(!graph.getNodes().contains(ID)) {
+                graph.addNode(ID);
+            }
         }
         for (int i = 0; i < vertices; i++) {
             Object node1 = graph.randomNode();
@@ -25,13 +28,16 @@ public class GraphGenerator implements ActionListener {
         }
     }
     private final Graph graph;
+    private final GraphVisualsGenerator generator;
 
-    public GraphGenerator(Graph graph) {
+    public GraphGenerator(Graph graph, GraphVisualsGenerator generator) {
         this.graph = graph;
+        this.generator = generator; 
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        GraphGenerator.generate(graph, 25, 50, 100);
+        GraphGenerator.generate(graph, 25, 40, 10);
+        generator.calculateCoords();
     }
 }

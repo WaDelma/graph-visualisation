@@ -141,7 +141,7 @@ public class Graph<N> {
     public Set<N> getNodes() {
         return nodes.keySet();
     }
-
+    
     /**
      * Vertex with certain weight.
      * 
