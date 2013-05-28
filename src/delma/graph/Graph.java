@@ -120,8 +120,8 @@ public class Graph<N> {
     /**
      * @return Iterator over nodes
      */
-    public Iterator<N> iterator() {
-        return nodes.keySet().iterator();
+    public Iterator<Entry<N, List<Vertex<N>>>> iterator() {
+        return nodes.entrySet().iterator();
     }
 
     /**

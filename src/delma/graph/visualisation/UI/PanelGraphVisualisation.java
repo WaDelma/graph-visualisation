@@ -1,26 +1,33 @@
 package delma.graph.visualisation.UI;
 
-import delma.dequelist.ArrayDequeList;
 import delma.graph.Graph;
 import delma.graph.Graph.Vertex;
+import delma.graph.visualisation.Coordinates;
+import delma.graph.visualisation.GraphVisualsGenerator;
 import java.awt.Graphics;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
+import java.util.Map.Entry;
 import javax.swing.JPanel;
 
 /**
  * Panel where Graph is drawn.
- *
+ * TODO: Scrolling
  * @author Antti
  */
-public class PanelGraphVisualisation extends JPanel {
+public class PanelGraphVisualisation extends JPanel implements MouseListener{
 
     private final Graph<String> graph;
-    private double TAU = Math.PI * 2;
+    private final GraphVisualsGenerator<String> generator;
+    private Coordinates focus;
+    private Coordinates prev;
 
-    public PanelGraphVisualisation(Graph<String> graph) {
+    public PanelGraphVisualisation(Graph<String> graph, GraphVisualsGenerator generator) {
         this.graph = graph;
+        this.generator = generator;
+        focus = new Coordinates(this.getWidth() / 2, this.getHeight() / 2);
     }
 
     /*
@@ -28,59 +35,50 @@ public class PanelGraphVisualisation extends JPanel {
      */
     @Override
     public void paintComponent(Graphics g) {
-        if (graph.size() == 0) {
-            return;
-        }
-        Random rand = new Random();
-        ArrayDequeList<String> nodesNotUsed = new ArrayDequeList(graph.getNodes());
-        ArrayDequeList<String> stack = new ArrayDequeList();
-        ArrayDequeList<Coord> coordStack = new ArrayDequeList();
-        int length = 40;
-        while (!nodesNotUsed.isEmpty()) {
-            stack.push(nodesNotUsed.peek());
-            coordStack.push(new Coord(this.getWidth() / 2 + rand.nextInt(600) - 300, this.getHeight() / 2 + rand.nextInt(600) - 300));
-            while (!stack.isEmpty()) {
-                String cur = stack.pop();
-                Coord curCoord = coordStack.pop();
-                g.drawString(cur, curCoord.getX(), curCoord.getY());
-                if (!nodesNotUsed.contains(cur)) {
-                    continue;
-                }
-                nodesNotUsed.remove(cur);
-                List<Vertex<String>> neigbours = graph.getNeighbourNodes(cur);
-                double angle = TAU / neigbours.size();
-                int i = 0;
-                for (Iterator<Vertex<String>> it = neigbours.iterator(); it.hasNext();) {
-                    Vertex<String> v = it.next();
-                    stack.push(v.getNode());
-                    int weight = v.getWeight();
-                    int xx = (int) (Math.cos(angle * i) * (length + weight));
-                    int yy = (int) (Math.sin(angle * i) * (length + weight));
-                    g.drawLine(curCoord.getX(), curCoord.getY(), curCoord.getX() + xx, curCoord.getY() + yy);
-                    coordStack.push(new Coord(curCoord.getX() + xx, curCoord.getY() + yy));
-                    i++;
-                }
+        generator.calculateCoords();
+        for (Iterator<Entry<String, List<Vertex<String>>>> it = graph.iterator(); it.hasNext();) {
+            Entry<String, List<Vertex<String>>> cur = it.next();
+            Coordinates curCoord = generator.getCoordinates(cur.getKey());
+            if (curCoord == null) {
+                continue;
             }
+            g.drawString(cur.getKey(), curCoord.getX(), curCoord.getY());
+            for (Iterator<Vertex<String>> it1 = cur.getValue().iterator(); it1.hasNext();) {
+                Coordinates tempCoord = generator.getCoordinates(it1.next().getNode());
+                g.drawLine(curCoord.getX(), curCoord.getY(), tempCoord.getX(), tempCoord.getY());
+            }
+
         }
         //g.drawLine(x1, y1, x2, y2); 
     }
 
-    private static class Coord {
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        
+    }
 
-        private final int x;
-        private final int y;
-
-        public Coord(int x, int y) {
-            this.x = x;
-            this.y = y;
+    @Override
+    public void mousePressed(MouseEvent e) {
+        Coordinates cur = new Coordinates(e.getX(), e.getY());
+        if(prev != null){
+            focus.set(cur.getX() - prev.getX(), cur.getY() - prev.getY());
+            this.getParent().repaint();
         }
+        prev = cur;
+    }
 
-        public int getX() {
-            return x;
-        }
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        prev = null;
+    }
 
-        public int getY() {
-            return y;
-        }
+    @Override
+    public void mouseEntered(MouseEvent e) {
+        
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+        
     }
 }

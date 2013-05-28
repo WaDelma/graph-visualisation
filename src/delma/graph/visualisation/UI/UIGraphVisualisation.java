@@ -2,6 +2,7 @@ package delma.graph.visualisation.UI;
 
 import delma.graph.Graph;
 import delma.graph.visualisation.GraphGenerator;
+import delma.graph.visualisation.GraphVisualsGenerator;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
@@ -26,9 +27,10 @@ public class UIGraphVisualisation implements ActionListener{
         frame = new JFrame("Graph Visualiser");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(640, 480);
-        JPanel asdasd = new PanelGraphVisualisation(graph);
-        asdasd.setSize(640, 480);
-        frame.getContentPane().add(asdasd);
+        PanelGraphVisualisation panel = new PanelGraphVisualisation(graph, new GraphVisualsGenerator(graph));
+        panel.setSize(640, 480);
+        panel.addMouseListener(panel);
+        frame.getContentPane().add(panel);
         JMenuBar menuBar = new JMenuBar();
         {
             JMenu menu = new JMenu("Generation");
