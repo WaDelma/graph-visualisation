@@ -12,6 +12,14 @@ import java.util.Random;
  */
 public class GraphGenerator implements ActionListener {
 
+    /**
+     * Generates new random graph
+     * 
+     * @param graph Graph to which new graph is generated
+     * @param nodes Approximately how many nodes there will be
+     * @param vertices How many vertices there will be
+     * @param maxWeight How large weight can be
+     */
     public static void generate(Graph<Object> graph, int nodes, double vertices, int maxWeight) {
         graph.clear();
         Random rand = new Random();
@@ -24,20 +32,17 @@ public class GraphGenerator implements ActionListener {
         for (int i = 0; i < vertices; i++) {
             Object node1 = graph.randomNode();
             Object node2 = graph.randomNode();
-            graph.addVertex("" + node1, "" + node2, rand.nextInt(maxWeight));
+            graph.addVertex("" + node1, "" + node2, rand.nextInt(maxWeight) + 1);
         }
     }
     private final Graph graph;
-    private final GraphVisualsGenerator generator;
 
-    public GraphGenerator(Graph graph, GraphVisualsGenerator generator) {
+    public GraphGenerator(Graph graph) {
         this.graph = graph;
-        this.generator = generator; 
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         GraphGenerator.generate(graph, 25, 40, 10);
-        generator.calculateCoords();
     }
 }

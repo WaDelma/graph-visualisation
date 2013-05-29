@@ -21,6 +21,9 @@ public class UIGraphVisualisation implements ActionListener {
 
     private final JFrame frame;
 
+    /**
+     * @param graph Graph which is to be drawn to UI
+     */
     public UIGraphVisualisation(final Graph graph) {
         frame = new JFrame("Graph Visualiser");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -45,9 +48,8 @@ public class UIGraphVisualisation implements ActionListener {
                 {
                     menuItem.getAccessibleContext().setAccessibleDescription(
                             "Generates new graph");
-                    menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, 0/*InputEvent.ALT_DOWN_MASK*/));
-                    menuItem.addActionListener(new GraphGenerator(graph, visualsGenerator));
-                    menuItem.addActionListener(this);
+                    menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, 0));
+                    menuItem.addActionListener(new ListenInSequence(new GraphGenerator(graph), visualsGenerator, this));
                 }
                 menu.add(menuItem);
             }
@@ -64,8 +66,16 @@ public class UIGraphVisualisation implements ActionListener {
                     menuItem.getAccessibleContext().setAccessibleDescription(
                             "Refresh drawing of graph");
                     menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0));
-                    menuItem.addActionListener(visualsGenerator);
-                    menuItem.addActionListener(this);
+                    menuItem.addActionListener(new ListenInSequence(visualsGenerator, this));
+                }
+                menu.add(menuItem);
+
+                menuItem = new JMenuItem("Focus");
+                {
+                    menuItem.getAccessibleContext().setAccessibleDescription(
+                            "Refresh drawing of graph");
+                    menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_0, 0));
+                    menuItem.addActionListener(new ListenInSequence(panel, this));
                 }
                 menu.add(menuItem);
             }
@@ -74,10 +84,32 @@ public class UIGraphVisualisation implements ActionListener {
         frame.setJMenuBar(menuBar);
         frame.setVisible(true);
     }
-
+    
+    /**
+     * Repaints graph
+     * @param e 
+     */
     @Override
     public void actionPerformed(ActionEvent e) {
-        //generator.calculateCoords();
         frame.repaint();
+    }
+
+    /**
+     * Allows sequential ActionListeners.
+     */
+    private static class ListenInSequence implements ActionListener {
+
+        private final ActionListener[] listeners;
+
+        public ListenInSequence(ActionListener... listeners) {
+            this.listeners = listeners;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            for (ActionListener listener : listeners) {
+                listener.actionPerformed(e);
+            }
+        }
     }
 }

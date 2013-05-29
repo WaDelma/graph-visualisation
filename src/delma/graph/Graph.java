@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 
@@ -14,7 +15,7 @@ import java.util.Set;
  *
  * @author Antti
  */
-public class Graph<N> {
+public class Graph<N> implements Iterable<Map.Entry<N, List<Graph.Vertex<N>>>> {
 
     private Map<N, List<Vertex<N>>> nodes;
     private final Random rand;
@@ -141,7 +142,7 @@ public class Graph<N> {
     public Set<N> getNodes() {
         return nodes.keySet();
     }
-    
+
     /**
      * Vertex with certain weight.
      * 
@@ -150,11 +151,18 @@ public class Graph<N> {
     public static class Vertex<N> {
 
         private final N node;
-        private final int weight;
+        private int weight;
+        private final boolean dummy;
+        
+        public Vertex(N targetNode){
+            node = targetNode;
+            dummy = true;
+        }
 
         private Vertex(N targetNode, int weight) {
             this.node = targetNode;
             this.weight = weight;
+            dummy = false;
         }
 
         public N getNode() {
@@ -163,6 +171,34 @@ public class Graph<N> {
 
         public int getWeight() {
             return weight;
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 7;
+            hash = 29 * hash + Objects.hashCode(this.node);
+            if(!dummy) {
+                hash = 29 * hash + this.weight;
+            }
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final Vertex<N> other = (Vertex<N>) obj;
+            if (!Objects.equals(this.node, other.node)) {
+                return false;
+            }
+            if (!dummy && this.weight != other.weight) {
+                return false;
+            }
+            return true;
         }
     }
 }
