@@ -43,6 +43,6 @@ public class GraphGenerator implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        GraphGenerator.generate(graph, 25, 40, 10);
+        GraphGenerator.generate(graph, 25, 40, 100);
     }
 }

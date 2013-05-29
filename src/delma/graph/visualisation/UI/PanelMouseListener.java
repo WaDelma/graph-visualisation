@@ -1,4 +1,3 @@
-
 package delma.graph.visualisation.UI;
 
 import delma.graph.visualisation.Vector;

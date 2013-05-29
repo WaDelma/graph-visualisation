@@ -5,16 +5,18 @@ import delma.graph.visualisation.UI.UIGraphVisualisation;
 
 /**
  * Main class. Holds strings to all important things.
- * 
+ *
  * @author aopkarja
  */
 public class GraphVisualisation {
+
+    private static GraphVisualisation instance;
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        GraphVisualisation instance = new GraphVisualisation();
+        instance = new GraphVisualisation();
     }
     private Graph<String> graph;
     private UIGraphVisualisation UI;

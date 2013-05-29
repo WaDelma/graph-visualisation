@@ -56,6 +56,23 @@ public class ArrayDequeListTest {
     }
 
     @Test()
+    public void addingAllWorks() {
+        emptyList.addAll(collection);
+        assertArrayEquals(collection.toArray(), emptyList.toArray());
+        collection.addAll(arrayList);
+        emptyList.addAll(arrayList);
+        assertArrayEquals(collection.toArray(), emptyList.toArray());
+    }
+
+    @Test()
+    public void addingAllAfterConstructorWithCollectionWorks() {
+        emptyList = new ArrayDequeList(collection);
+        emptyList.addAll(arrayList);
+        collection.addAll(arrayList);
+        assertArrayEquals(collection.toArray(), emptyList.toArray());
+    }
+
+    @Test()
     public void getFirstWorks() {
         assertEquals(array[0], arrayList.getFirst());
         assertEquals(array.length, arrayList.size());
@@ -187,7 +204,6 @@ public class ArrayDequeListTest {
             arrayList.subList(1, 2).get(2);
             fail("Allows access to outside of sublist.");
         } catch (IndexOutOfBoundsException e) {
-            
         }
         arrayList.subList(1, 2).add("O");
         assertEquals("O", arrayList.get(1));

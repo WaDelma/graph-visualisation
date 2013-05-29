@@ -2,6 +2,7 @@ package delma.graph.visualisation.UI;
 
 import delma.graph.Graph;
 import delma.graph.Graph.Vertex;
+import delma.graph.visualisation.GraphVisualisation;
 import delma.graph.visualisation.Vector;
 import delma.graph.visualisation.GraphVisualsGenerator;
 import delma.math.Constants;
@@ -69,7 +70,7 @@ public class PanelGraphVisualisation extends JPanel implements ActionListener {
 
                     g.setFont(new Font("Arial", 0, 10 + (int) (scale)));
                     g.setColor(new Color(0, 100, 150));
-                    g.drawString(vertex.getNode(), toX + (fromX - toX) / 2, toY + (fromY - toY) / 2);
+                    g.drawString("" + vertex.getWeight(), toX + (fromX - toX) / 2, toY + (fromY - toY) / 2);
                     g.setColor(Color.BLACK);
                 }
             }

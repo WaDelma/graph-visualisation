@@ -32,7 +32,7 @@ public class Vector {
         return Math.sqrt(coord.x * coord.x + coord.y * coord.y);
     }
 
-    public static Vector anti(Vector c) {
+    public static Vector flip(Vector c) {
         return new Vector(-c.x, -c.y);
     }
     private double x, y;

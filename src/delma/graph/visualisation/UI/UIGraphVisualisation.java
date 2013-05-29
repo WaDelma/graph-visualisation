@@ -7,6 +7,8 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -30,13 +32,17 @@ public class UIGraphVisualisation implements ActionListener {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(640, 480);
         frame.setBackground(Color.WHITE);
+
         GraphVisualsGenerator visualsGenerator = new GraphVisualsGenerator(graph);
+
         PanelGraphVisualisation panel = new PanelGraphVisualisation(graph, visualsGenerator);
         panel.setSize(640, 480);
+
         PanelMouseListener mouseListener = new PanelMouseListener(panel);
         panel.addMouseMotionListener(mouseListener);
         panel.addMouseListener(mouseListener);
         panel.addMouseWheelListener(mouseListener);
+
         frame.getContentPane().add(panel);
         JMenuBar menuBar = new JMenuBar();
         {
@@ -46,14 +52,15 @@ public class UIGraphVisualisation implements ActionListener {
                         "Contains options for generating graphs");
                 menu.setMnemonic('g');
 
-                JMenuItem menuItem = new JMenuItem("Generate random graph");
-                {
-                    menuItem.getAccessibleContext().setAccessibleDescription(
-                            "Generates new graph");
-                    menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, 0));
-                    menuItem.addActionListener(new ListenInSequence(new GraphGenerator(graph), visualsGenerator, this));
-                }
-                menu.add(menuItem);
+                ActionListener listener = new ListenInSequence(new GraphGenerator(graph), visualsGenerator.getInitialisationListener(), visualsGenerator.getStepListener(), this);
+                createMenuItem(menu, "Generate random graph", "Generates new graph", KeyStroke.getKeyStroke(KeyEvent.VK_G, 0), listener);
+
+                listener = new ListenInSequence(visualsGenerator.getStepListener(), this);
+                createMenuItem(menu, "Step", "Step in iteration", KeyStroke.getKeyStroke(KeyEvent.VK_S, 0), listener);
+                
+                ActionListener a = visualsGenerator.getStepListener();
+                listener = new Repeat(new ListenInSequence(a, this), 1, visualsGenerator.getStepChecker(), true);
+                createMenuItem(menu, "Calculate", "Iterate until equilibrium", KeyStroke.getKeyStroke(KeyEvent.VK_C, 0), listener);
             }
             menuBar.add(menu);
 
@@ -63,33 +70,33 @@ public class UIGraphVisualisation implements ActionListener {
                         "Contains actions regarding window");
                 menu.setMnemonic('w');
 
-                JMenuItem menuItem = new JMenuItem("Refresh");
-                {
-                    menuItem.getAccessibleContext().setAccessibleDescription(
-                            "Refresh drawing of graph");
-                    menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0));
-                    menuItem.addActionListener(new ListenInSequence(visualsGenerator, this));
-                }
-                menu.add(menuItem);
+                ActionListener listener = new ListenInSequence(visualsGenerator.getInitialisationListener(), visualsGenerator.getStepListener(), this);
+                createMenuItem(menu, "Refresh", "Refresh drawing of graph", KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0), listener);
 
-                menuItem = new JMenuItem("Focus");
-                {
-                    menuItem.getAccessibleContext().setAccessibleDescription(
-                            "Refresh drawing of graph");
-                    menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_0, 0));
-                    menuItem.addActionListener(new ListenInSequence(panel, this));
-                }
-                menu.add(menuItem);
+                listener = new ListenInSequence(panel, this);
+                createMenuItem(menu, "Focus", "Focuses screen to origin", KeyStroke.getKeyStroke(KeyEvent.VK_0, 0), listener);
             }
             menuBar.add(menu);
         }
         frame.setJMenuBar(menuBar);
         frame.setVisible(true);
     }
-    
+
+    private void createMenuItem(JMenu menu, String name, String desc, KeyStroke keyStroke, ActionListener listener) {
+        JMenuItem menuItem = new JMenuItem(name);
+        {
+            menuItem.getAccessibleContext().setAccessibleDescription(desc);
+            menuItem.setAccelerator(keyStroke);
+            menuItem.addActionListener(listener);
+        }
+        menu.add(menuItem);
+
+    }
+
     /**
      * Repaints graph
-     * @param e 
+     *
+     * @param e
      */
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -113,5 +120,55 @@ public class UIGraphVisualisation implements ActionListener {
                 listener.actionPerformed(e);
             }
         }
+    }
+
+    /**
+     * Allows repeating of actions
+     */
+    private static class Repeat implements ActionListener {
+
+        private final ActionListener listener;
+        private final int time;
+        private final boolean toggle;
+        private final Requirement req;
+        private volatile boolean active;
+
+        public Repeat(ActionListener listener, int time, Requirement req, boolean toggle) {
+            this.listener = listener;
+            this.time = time;
+            this.toggle = toggle;
+            this.req = req;
+        }
+
+        @Override
+        public void actionPerformed(final ActionEvent e) {
+            if(active){
+                if(toggle){
+                    active = false;
+                }
+                return;
+            }
+            Thread thread = new Thread() {
+                @Override
+                public void run() {
+                    active = true;
+                    while (active && req.check()) {
+                        listener.actionPerformed(e);
+                        try {
+                            Thread.sleep(time);
+                        } catch (InterruptedException ex) {
+                            Logger.getLogger(UIGraphVisualisation.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                        
+                    }
+                    active = false;
+                }
+            };
+            thread.start();
+        }
+    }
+
+    public static interface Requirement {
+        public boolean check();
     }
 }
