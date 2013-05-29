@@ -62,6 +62,7 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
     @Override
     public void addFirst(E e) {
         if (isEmpty()) {
+            data = new Object[1];
             data[first] = e;
             empty = false;
             return;
@@ -78,6 +79,7 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
     @Override
     public void addLast(E e) {
         if (isEmpty()) {
+            data = new Object[1];
             data[last] = e;
             empty = false;
             return;

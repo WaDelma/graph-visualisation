@@ -3,6 +3,7 @@ package delma.graph.visualisation.UI;
 import delma.graph.Graph;
 import delma.graph.visualisation.GraphGenerator;
 import delma.graph.visualisation.GraphVisualsGenerator;
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -28,6 +29,7 @@ public class UIGraphVisualisation implements ActionListener {
         frame = new JFrame("Graph Visualiser");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(640, 480);
+        frame.setBackground(Color.WHITE);
         GraphVisualsGenerator visualsGenerator = new GraphVisualsGenerator(graph);
         PanelGraphVisualisation panel = new PanelGraphVisualisation(graph, visualsGenerator);
         panel.setSize(640, 480);

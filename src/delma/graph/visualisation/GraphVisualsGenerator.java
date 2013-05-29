@@ -5,6 +5,7 @@ import delma.graph.Graph;
 import delma.graph.Graph.Vertex;
 import delma.map.HashMap;
 import delma.math.Constants;
+import delma.utils.Utils;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Iterator;
@@ -19,7 +20,7 @@ import java.util.Random;
  */
 public class GraphVisualsGenerator<N> implements ActionListener {
 
-    private Map<N, Coordinates> coordinates;
+    private Map<N, Vector> coordinates;
     private final Graph<N> graph;
     private final Random rand;
 
@@ -29,7 +30,7 @@ public class GraphVisualsGenerator<N> implements ActionListener {
         rand = new Random();
     }
 
-    public Coordinates getCoordinates(N n) {
+    public Vector getCoordinates(N n) {
         return coordinates.get(n);
     }
 
@@ -41,41 +42,73 @@ public class GraphVisualsGenerator<N> implements ActionListener {
             return;
         }
         coordinates.clear();
-        HashMap<N, Coordinates> force = new HashMap<>();
+        HashMap<N, Vector> force = new HashMap<>();
         int size = graph.size() * 5;
         for (Map.Entry<N, List<Graph.Vertex<N>>> temp : graph) {
             int tempX = rand.nextInt(size * 2) - size;
             int tempY = rand.nextInt(size * 2) - size;
-            coordinates.put(temp.getKey(), new Coordinates(tempX, tempY));
-            force.put(temp.getKey(), new Coordinates());
+            coordinates.put(temp.getKey(), new Vector(tempX, tempY));
+            force.put(temp.getKey(), new Vector());
         }
 
-        for (int i = 0; i < coordinates.size(); i++) {
-            for (Map.Entry<N, Coordinates> entry : coordinates.entrySet()) {
-                Coordinates temp = force.get(entry.getKey());
-                System.out.println(temp);
-                for (Map.Entry<N, Coordinates> entry2 : coordinates.entrySet()) {
+        //while (true) {
+        for (int i = 0; i < coordinates.size() * 10; i++) {
+            for (Map.Entry<N, Vector> entry : coordinates.entrySet()) {
+                Vector forceVector = force.get(entry.getKey());
+                //System.out.println(temp);
+                for (Map.Entry<N, Vector> entry2 : coordinates.entrySet()) {
                     if (entry2.getKey() != entry.getKey()) {
-                        Coordinates dist = Coordinates.diff(entry2.getValue(), entry.getValue());
-                        boolean flag = true;
+                        Vector dist = Vector.diff(entry2.getValue(), entry.getValue());
+                        //boolean flag = true;
+                        //TODO: Utils.merge(graph.getNeighbourNodes(entry.getKey()), graph.getNodesThatHaveThisNodeAsNeighbour(entry.getKey()))
                         for (Vertex<N> vertex : graph.getNeighbourNodes(entry.getKey())) {
                             if (vertex.getNode().equals(entry2.getKey())) {
-                                dist.scale(new Coordinates(0.10, 0.10));
-                                temp.move(Coordinates.anti(dist));
-                                flag = false;
+                                double length = Vector.distance(dist);
+                                Vector t = new Vector(dist);
+                                t.normalize();
+                                double diff = length - vertex.getWeight();
+                                t.scale(diff);
+                                t = Vector.anti(t);
+                                t.add(dist);
+
+                                forceVector.add(t);
+
+                                //flag = false;
+
+                                //if (Coordinates.distance(entry2.getValue(), entry.getValue()) > vertex.getWeight()) {
+
+                                //dist.scale(new Coordinates(0.15, 0.15));
+                                //temp.move(Coordinates.anti(dist));
+                                // }
+                                //    flag = false;
+                                //}
                             }
                         }
-                        if (flag) {
-                            dist.scale(new Coordinates(0.15, 0.15));
-                            temp.move(dist);
-                        }
+                        forceVector.add(new Vector(dist.getX() == 0 ? 0 : 1 / dist.getX(), dist.getY() == 0 ? 0 : 1 / dist.getY()));
+
+                        //forceVector.add();
+                        /*if (flag) {
+                            
+                         }*/
                     }
 
                 }
-                temp.scale(new Coordinates(0.9, 0.9));
+                
+                //TODO: Global gravity
+                /*Vector r = Vector.anti(new Vector(entry.getValue()));
+                r.scale(size);
+                forceVector.add(new Vector());*/
+                //forceVector.scale(new Vector(0.9, 0.9));
             }
-            for (Map.Entry<N, Coordinates> forceEntry : force.entrySet()) {
-                coordinates.get(forceEntry.getKey()).move(forceEntry.getValue());
+            boolean flag = true;
+            for (Map.Entry<N, Vector> forceEntry : force.entrySet()) {
+                if (Vector.distance(forceEntry.getValue()) > 0.01) {
+                    flag = false;
+                }
+                coordinates.get(forceEntry.getKey()).add(forceEntry.getValue());
+            }
+            if (flag) {
+                break;
             }
         }
         /*

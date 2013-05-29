@@ -4,7 +4,7 @@ package delma.graph.visualisation;
  *
  * @author Antti
  */
-public class Coordinates {
+public class Vector {
 
     /**
      *
@@ -12,8 +12,8 @@ public class Coordinates {
      * @param coord2
      * @return New coordinate where coord2 is considered as (0, 0)
      */
-    public static Coordinates diff(Coordinates coord1, Coordinates coord2) {
-        return new Coordinates(coord1.x - coord2.x, coord1.y - coord2.y);
+    public static Vector diff(Vector coord1, Vector coord2) {
+        return new Vector(coord1.x - coord2.x, coord1.y - coord2.y);
     }
 
     /**
@@ -22,17 +22,21 @@ public class Coordinates {
      * @param coord2
      * @return Euclidean distance between coord1 and coord2
      */
-    public static double distance(Coordinates coord1, Coordinates coord2) {
+    public static double distance(Vector coord1, Vector coord2) {
         double xDiff = coord1.x - coord2.x;
         double yDiff = coord1.y - coord2.y;
         return Math.sqrt(xDiff * xDiff + yDiff * yDiff);
     }
 
-    public static Coordinates anti(Coordinates c) {
-        return new Coordinates(-c.x, -c.y);
+    static double distance(Vector coord) {
+        return Math.sqrt(coord.x * coord.x + coord.y * coord.y);
+    }
+
+    public static Vector anti(Vector c) {
+        return new Vector(-c.x, -c.y);
     }
     private double x, y;
-    private static final Coordinates ORIGIN = new Coordinates();
+    private static final Vector ORIGIN = new Vector();
 
     /**
      * Creates coordinate object to place (x, y)
@@ -40,15 +44,19 @@ public class Coordinates {
      * @param x
      * @param y
      */
-    public Coordinates(double x, double y) {
+    public Vector(double x, double y) {
         this.x = x;
         this.y = y;
+    }
+
+    public Vector(Vector c) {
+        this(c.x, c.y);
     }
 
     /**
      * Creates coordinate object to place (0, 0)
      */
-    public Coordinates() {
+    public Vector() {
     }
 
     public double getX() {
@@ -64,7 +72,7 @@ public class Coordinates {
      *
      * @param c
      */
-    public void set(Coordinates c) {
+    public void set(Vector c) {
         x = c.x;
         y = c.y;
     }
@@ -74,7 +82,7 @@ public class Coordinates {
      *
      * @param c
      */
-    public void move(Coordinates c) {
+    public void add(Vector c) {
         x += c.x;
         y += c.y;
     }
@@ -84,9 +92,14 @@ public class Coordinates {
      *
      * @param c
      */
-    public void scale(Coordinates c) {
+    public void scale(Vector c) {
         x *= c.x;
         y *= c.y;
+    }
+
+    public void scale(double scale) {
+        x *= scale;
+        y *= scale;
     }
 
     /**
@@ -126,7 +139,7 @@ public class Coordinates {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final Coordinates other = (Coordinates) obj;
+        final Vector other = (Vector) obj;
         if (Double.doubleToLongBits(this.x) != Double.doubleToLongBits(other.x)) {
             return false;
         }

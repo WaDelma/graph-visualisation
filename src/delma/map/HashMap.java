@@ -47,7 +47,7 @@ public class HashMap<K, V> implements Map<K, V> {
     public int size() {
         return size;
     }
-
+    
     @Override
     public boolean isEmpty() {
         return size == 0;
@@ -65,7 +65,7 @@ public class HashMap<K, V> implements Map<K, V> {
                 continue;
             }
             for (Entry e = entry; e != null; e = e.next) {
-                if (value == e.value || (value != null && value.equals(e.value))) {
+                if (equals(value, e.value)) {
                     return true;
                 }
             }
@@ -77,7 +77,7 @@ public class HashMap<K, V> implements Map<K, V> {
     public V get(Object key) {
         int hash = getHash(key, data.length);
         for (Entry e = data[hash]; e != null; e = e.next) {
-            if (key == e.key || (key != null && key.equals(e.key))) {
+            if (equals(key, e.key)) {
                 return (V) e.value;
             }
         }
@@ -92,7 +92,7 @@ public class HashMap<K, V> implements Map<K, V> {
             size++;
         } else {
             for (Entry e = data[hash]; e != null; e = e.next) {
-                if (key == e.key || (key != null && key.equals(e.key))) {
+                if (equals(key, e.key)) {
                     V temp = (V) e.value;
                     e.value = value;
                     if (size >= load * data.length) {
@@ -115,7 +115,7 @@ public class HashMap<K, V> implements Map<K, V> {
         } else {
             Entry last = null;
             for (Entry e = data[hash]; e != null; e = e.next) {
-                if (key == e.key || (key != null && key.equals(e.key))) {
+                if (equals(key, e.key)) {
                     if (last == null) {
                         data[hash] = e.next;
                     } else {
@@ -178,6 +178,10 @@ public class HashMap<K, V> implements Map<K, V> {
             }
         }
         data = temp;
+    }
+
+    private boolean equals(Object o1, Object o2) {
+        return o1 == o2 || (o1 != null && o1.equals(o2));
     }
 
     /**
@@ -411,9 +415,8 @@ public class HashMap<K, V> implements Map<K, V> {
             }
             Map.Entry entry = (Map.Entry) o;
             Object tempKey = entry.getKey();
-            if (key == tempKey || (key != null && key.equals(tempKey))) {
-                Object tempValue = entry.getValue();
-                return value == tempValue || (value != null && value.equals(tempValue));
+            if (equals(key, tempKey)) {
+                return equals(value, entry.getValue());
             }
             return false;
         }

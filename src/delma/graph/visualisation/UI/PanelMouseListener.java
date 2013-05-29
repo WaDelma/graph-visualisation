@@ -1,7 +1,7 @@
 
 package delma.graph.visualisation.UI;
 
-import delma.graph.visualisation.Coordinates;
+import delma.graph.visualisation.Vector;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -15,7 +15,7 @@ import java.awt.event.MouseWheelListener;
 public class PanelMouseListener implements MouseMotionListener, MouseListener, MouseWheelListener {
 
     private final PanelGraphVisualisation panel;
-    private Coordinates prev;
+    private Vector prev;
 
     public PanelMouseListener(PanelGraphVisualisation panel) {
         this.panel = panel;
@@ -25,9 +25,9 @@ public class PanelMouseListener implements MouseMotionListener, MouseListener, M
     public void mouseDragged(MouseEvent e) {
         int mask = MouseEvent.BUTTON1_DOWN_MASK;
         if ((e.getModifiersEx() & mask) == mask) {
-            Coordinates cur = new Coordinates(e.getX(), e.getY());
-            Coordinates focus = panel.getFocus();
-            focus.move(Coordinates.diff(cur, prev));
+            Vector cur = new Vector(e.getX(), e.getY());
+            Vector focus = panel.getFocus();
+            focus.add(Vector.diff(cur, prev));
             panel.getParent().repaint();
             prev = cur;
         }
@@ -43,7 +43,7 @@ public class PanelMouseListener implements MouseMotionListener, MouseListener, M
 
     @Override
     public void mousePressed(MouseEvent e) {
-        prev = new Coordinates(e.getX(), e.getY());
+        prev = new Vector(e.getX(), e.getY());
     }
 
     @Override
@@ -60,7 +60,7 @@ public class PanelMouseListener implements MouseMotionListener, MouseListener, M
 
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
-        panel.setScale(panel.getScale() + e.getPreciseWheelRotation() * Math.log(1.01 + panel.getScale()) * 0.5);
+        panel.setScale(panel.getScale() + -e.getPreciseWheelRotation() * Math.log(1.01 + panel.getScale()) * 0.5);
         if (panel.getScale() < 0) {
             panel.setScale(0);
         }
