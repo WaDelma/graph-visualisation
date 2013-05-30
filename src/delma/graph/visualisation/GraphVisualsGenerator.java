@@ -1,13 +1,12 @@
 package delma.graph.visualisation;
 
 import delma.graph.Graph;
-import delma.graph.Graph.Vertex;
+import delma.graph.Graph.Edge;
 import delma.graph.visualisation.UI.UIGraphVisualisation.Requirement;
 import delma.map.HashMap;
 import delma.utils.Utils;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +44,7 @@ public class GraphVisualsGenerator<N> {
         coordinateVectors.clear();
         forceVectors = new HashMap<>();
         int size = graph.size() * 5;
-        for (Map.Entry<N, List<Graph.Vertex<N>>> temp : graph) {
+        for (Map.Entry<N, List<Graph.Edge<N>>> temp : graph) {
             int tempX = rand.nextInt(size * 2) - size;
             int tempY = rand.nextInt(size * 2) - size;
             coordinateVectors.put(temp.getKey(), new Vector(tempX, tempY));
@@ -63,26 +62,26 @@ public class GraphVisualsGenerator<N> {
             Vector forceVector = forceVectors.get(vectorEntry.getKey());
             for (Map.Entry<N, Vector> vertexVector : coordinateVectors.entrySet()) {
                 if (vertexVector.getKey() != vectorEntry.getKey()) {
-                    Vector local = Vector.diff(vertexVector.getValue(), vectorEntry.getValue());
-                    Collection<Vertex<N>> temp = Utils.merge(graph.getNeighbourNodes(vectorEntry.getKey()), graph.getNodesThatHaveThisNodeAsNeighbour(vectorEntry.getKey()));
-                    for (Vertex<N> vertex : temp) {
+                    Vector edge = Vector.diff(vertexVector.getValue(), vectorEntry.getValue());
+                    Collection<Edge<N>> temp = Utils.merge(graph.getNeighbourNodes(vectorEntry.getKey()), graph.getNodesThatHaveThisNodeAsNeighbour(vectorEntry.getKey()));
+                    for (Edge<N> vertex : temp) {
                         if (vertex.getNode().equals(vertexVector.getKey())) {
-                            Vector force = new Vector(local);
+                            Vector force = new Vector(edge);
                             force.normalize();
-                            force.scale(Vector.distance(local) - vertex.getWeight());
+                            force.scale(Vector.distance(edge) - vertex.getWeight());
                             force = Vector.flip(force);
-                            force.add(local);
+                            force.add(edge);
                             forceVector.add(force);
                         }
                     }
-                    double repulseX = local.getX() == 0 ? 0 : 1 / local.getX();
-                    double repulseY = local.getY() == 0 ? 0 : 1 / local.getY();
-                    forceVector.add(new Vector(repulseX, repulseY));
+                    double repulseX = edge.getX() == 0 ? 0 : 1 / edge.getX();
+                    double repulseY = edge.getY() == 0 ? 0 : 1 / edge.getY();
+                    //forceVector.add(new Vector(repulseX, repulseY));
                 }
 
             }
             
-            Vector gravity = Vector.diff(new Vector(), vectorEntry.getValue());
+            //Vector gravity = Vector.diff(new Vector(), vectorEntry.getValue());
             //forceVector.add(new Vector(gravity.getX() == 0 ? 0 : 1 / gravity.getX(), gravity.getY() == 0 ? 0 : 1 / gravity.getY()));
             //TODO: Global gravity? Does this help?
         }

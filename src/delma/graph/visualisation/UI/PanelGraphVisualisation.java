@@ -1,7 +1,7 @@
 package delma.graph.visualisation.UI;
 
 import delma.graph.Graph;
-import delma.graph.Graph.Vertex;
+import delma.graph.Graph.Edge;
 import delma.graph.visualisation.GraphVisualisation;
 import delma.graph.visualisation.Vector;
 import delma.graph.visualisation.GraphVisualsGenerator;
@@ -42,8 +42,8 @@ public class PanelGraphVisualisation extends JPanel implements ActionListener {
         int focusY = (int) (focus.getY() + getHeight() / 2.0);
         g.translate(focusX, focusY);
 
-        for (Iterator<Entry<String, List<Vertex<String>>>> it = graph.iterator(); it.hasNext();) {
-            Entry<String, List<Vertex<String>>> cur = it.next();
+        for (Iterator<Entry<String, List<Edge<String>>>> it = graph.iterator(); it.hasNext();) {
+            Entry<String, List<Edge<String>>> cur = it.next();
             Vector curCoord = generator.getCoordinates(cur.getKey());
             if (curCoord == null) {
                 continue;
@@ -56,8 +56,8 @@ public class PanelGraphVisualisation extends JPanel implements ActionListener {
             g.drawString(cur.getKey(), fromX, fromY);
             g.setColor(Color.BLACK);
 
-            for (Iterator<Vertex<String>> it1 = cur.getValue().iterator(); it1.hasNext();) {
-                Vertex<String> vertex = it1.next();
+            for (Iterator<Edge<String>> it1 = cur.getValue().iterator(); it1.hasNext();) {
+                Edge<String> vertex = it1.next();
                 if (vertex.getNode().equals(cur.getKey())) {
                     //TODO: How to represent self vertices
                 } else {

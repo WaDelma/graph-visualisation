@@ -17,10 +17,10 @@ public class GraphGenerator implements ActionListener {
      * 
      * @param graph Graph to which new graph is generated
      * @param nodes Approximately how many nodes there will be
-     * @param vertices How many vertices there will be
+     * @param edges How many vertices there will be
      * @param maxWeight How large weight can be
      */
-    public static void generate(Graph<Object> graph, int nodes, double vertices, int maxWeight) {
+    public static void generate(Graph<Object> graph, int nodes, double edges, int maxWeight) {
         graph.clear();
         Random rand = new Random();
         for (int i = 0; i < nodes; i++) {
@@ -29,10 +29,10 @@ public class GraphGenerator implements ActionListener {
                 graph.addNode(ID);
             }
         }
-        for (int i = 0; i < vertices; i++) {
+        for (int i = 0; i < edges; i++) {
             Object node1 = graph.randomNode();
             Object node2 = graph.randomNode();
-            graph.addVertex("" + node1, "" + node2, rand.nextInt(maxWeight) + 1);
+            graph.addEdge("" + node1, "" + node2, rand.nextInt(maxWeight) + 1);
         }
     }
     private final Graph graph;

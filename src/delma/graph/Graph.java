@@ -15,9 +15,9 @@ import java.util.Set;
  *
  * @author Antti
  */
-public class Graph<N> implements Iterable<Map.Entry<N, List<Graph.Vertex<N>>>> {
+public class Graph<N> implements Iterable<Map.Entry<N, List<Graph.Edge<N>>>> {
 
-    private Map<N, List<Vertex<N>>> nodes;
+    private Map<N, List<Edge<N>>> nodes;
     private final Random rand;
 
     /**
@@ -37,8 +37,8 @@ public class Graph<N> implements Iterable<Map.Entry<N, List<Graph.Vertex<N>>>> {
      * @return List of neighbour nodes. If no neighbours, returna empty list
      * instead
      */
-    public List<Vertex<N>> getNeighbourNodes(N node) {
-        List<Vertex<N>> result = nodes.get(node);
+    public List<Edge<N>> getNeighbourNodes(N node) {
+        List<Edge<N>> result = nodes.get(node);
         if (result == null) {
             result = new ArrayDequeList<>();
             nodes.put(node, result);
@@ -54,11 +54,11 @@ public class Graph<N> implements Iterable<Map.Entry<N, List<Graph.Vertex<N>>>> {
      * @param node Node which is neighbours of nodes that will be returned
      * @return
      */
-    public List<Vertex<N>> getNodesThatHaveThisNodeAsNeighbour(N node) {
-        List<Vertex<N>> result = new ArrayDequeList<>();
-        for (Iterator<Entry<N, List<Vertex<N>>>> it = nodes.entrySet().iterator(); it.hasNext();) {
-            Entry<N, List<Vertex<N>>> entry = it.next();
-            for (Vertex<N> n : entry.getValue()) {
+    public List<Edge<N>> getNodesThatHaveThisNodeAsNeighbour(N node) {
+        List<Edge<N>> result = new ArrayDequeList<>();
+        for (Iterator<Entry<N, List<Edge<N>>>> it = nodes.entrySet().iterator(); it.hasNext();) {
+            Entry<N, List<Edge<N>>> entry = it.next();
+            for (Edge<N> n : entry.getValue()) {
                 if (n.node.equals(node)) {
                     result.add(n);
                 }
@@ -72,11 +72,11 @@ public class Graph<N> implements Iterable<Map.Entry<N, List<Graph.Vertex<N>>>> {
      * @param node Node to be added
      */
     public void addNode(N node) {
-        nodes.put(node, new ArrayDequeList<Vertex<N>>());
+        nodes.put(node, new ArrayDequeList<Edge<N>>());
     }
 
     public void addVertex(N from, N to) {
-        addVertex(from, to, 1);
+        addEdge(from, to, 1);
     }
 
     /**
@@ -86,13 +86,13 @@ public class Graph<N> implements Iterable<Map.Entry<N, List<Graph.Vertex<N>>>> {
      * @param to
      * @param weight 
      */
-    public void addVertex(N from, N to, int weight) {
-        List<Vertex<N>> list = nodes.get(from);
+    public void addEdge(N from, N to, int weight) {
+        List<Edge<N>> list = nodes.get(from);
         if (list == null) {
             list = new ArrayDequeList<>();
             nodes.put(from, list);
         }
-        list.add(new Vertex(to, weight));
+        list.add(new Edge(to, weight));
     }
 
     public void addDirectionlessVertex(N node1, N node2) {
@@ -107,8 +107,8 @@ public class Graph<N> implements Iterable<Map.Entry<N, List<Graph.Vertex<N>>>> {
      * @param weight 
      */
     public void addDirectionlessVertex(N node1, N node2, int weight) {
-        addVertex(node1, node2, weight);
-        addVertex(node2, node1, weight);
+        addEdge(node1, node2, weight);
+        addEdge(node2, node1, weight);
     }
 
     /**
@@ -121,7 +121,7 @@ public class Graph<N> implements Iterable<Map.Entry<N, List<Graph.Vertex<N>>>> {
     /**
      * @return Iterator over nodes
      */
-    public Iterator<Entry<N, List<Vertex<N>>>> iterator() {
+    public Iterator<Entry<N, List<Edge<N>>>> iterator() {
         return nodes.entrySet().iterator();
     }
 
@@ -144,22 +144,22 @@ public class Graph<N> implements Iterable<Map.Entry<N, List<Graph.Vertex<N>>>> {
     }
 
     /**
-     * Vertex with certain weight.
+     * Edge with certain weight.
      * 
      * @param <N> 
      */
-    public static class Vertex<N> {
+    public static class Edge<N> {
 
         private final N node;
         private int weight;
         private final boolean dummy;
         
-        public Vertex(N targetNode){
+        public Edge(N targetNode){
             node = targetNode;
             dummy = true;
         }
 
-        private Vertex(N targetNode, int weight) {
+        private Edge(N targetNode, int weight) {
             this.node = targetNode;
             this.weight = weight;
             dummy = false;
@@ -191,7 +191,7 @@ public class Graph<N> implements Iterable<Map.Entry<N, List<Graph.Vertex<N>>>> {
             if (getClass() != obj.getClass()) {
                 return false;
             }
-            final Vertex<N> other = (Vertex<N>) obj;
+            final Edge<N> other = (Edge<N>) obj;
             if (!Objects.equals(this.node, other.node)) {
                 return false;
             }
