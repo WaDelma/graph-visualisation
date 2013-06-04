@@ -11,7 +11,7 @@ import java.util.Random;
 import java.util.Set;
 
 /**
- * Graph which 
+ * Graph which
  *
  * @author Antti
  */
@@ -34,33 +34,30 @@ public class Graph<N> implements Iterable<Map.Entry<N, List<Graph.Edge<N>>>> {
      * O(1)
      *
      * @param node Node which neighbour nodes will be returned
-     * @return List of neighbour nodes. If no neighbours, returna empty list
+     * @return List of neighbour nodes. If no neighbours, returns empty list
      * instead
      */
-    public List<Edge<N>> getNeighbourNodes(N node) {
-        List<Edge<N>> result = nodes.get(node);
-        if (result == null) {
-            result = new ArrayDequeList<>();
-            nodes.put(node, result);
-        }
-        return result;
+    public List<Edge<N>> getNeighbours(N node) {
+        ensure(node);
+        return nodes.get(node);
     }
 
     /**
-     * Return nodes that has specified node as neighbour.
+     * Return nodes that has specified node as neighbour. Edges are flipped.
      *
      * O(n + m)
      *
      * @param node Node which is neighbours of nodes that will be returned
+     *
      * @return
      */
-    public List<Edge<N>> getNodesThatHaveThisNodeAsNeighbour(N node) {
+    public List<Edge<N>> getThoseThatHaveThisAsANeighbour(N node) {
         List<Edge<N>> result = new ArrayDequeList<>();
-        for (Iterator<Entry<N, List<Edge<N>>>> it = nodes.entrySet().iterator(); it.hasNext();) {
+        for (Iterator<Entry<N, List<Edge<N>>>> it = this.iterator(); it.hasNext();) {
             Entry<N, List<Edge<N>>> entry = it.next();
             for (Edge<N> n : entry.getValue()) {
-                if (n.node.equals(node)) {
-                    result.add(n);
+                if (node.equals(n.node)) {
+                    result.add(new Edge(entry.getKey(), n.getWeight()));
                 }
             }
         }
@@ -69,44 +66,59 @@ public class Graph<N> implements Iterable<Map.Entry<N, List<Graph.Edge<N>>>> {
 
     /**
      * Adds node to graph.
+     *
      * @param node Node to be added
      */
     public void addNode(N node) {
         nodes.put(node, new ArrayDequeList<Edge<N>>());
     }
 
-    public void addVertex(N from, N to) {
+    /**
+     * Removes node from graph.
+     *
+     * @param node
+     */
+    public void removeNode(N node) {
+        nodes.remove(node);
+        for (Iterator<Entry<N, List<Edge<N>>>> it = this.iterator(); it.hasNext();) {
+            List<Edge<N>> list = it.next().getValue();
+            for (int i = 0; i < list.size(); i++) {
+                if (list.get(i).node == node) {
+                    list.remove(i);
+                }
+            }
+        }
+    }
+
+    public void addEdge(N from, N to) {
         addEdge(from, to, 1);
     }
 
     /**
      * Adds vertex from one node to another with certain weight.
-     * 
+     *
      * @param from
      * @param to
-     * @param weight 
+     * @param weight
      */
     public void addEdge(N from, N to, int weight) {
-        List<Edge<N>> list = nodes.get(from);
-        if (list == null) {
-            list = new ArrayDequeList<>();
-            nodes.put(from, list);
-        }
-        list.add(new Edge(to, weight));
+        ensure(from);
+        ensure(to);
+        nodes.get(from).add(new Edge(to, weight));
     }
 
-    public void addDirectionlessVertex(N node1, N node2) {
-        addDirectionlessVertex(node1, node2, 1);
+    public void addDirectionlessEdge(N node1, N node2) {
+        addDirectionlessEdge(node1, node2, 1);
     }
 
     /**
-     * Adds directionless node to graph with certain weight.
-     * 
+     * Adds directionless edge to graph with certain weight.
+     *
      * @param node1
      * @param node2
-     * @param weight 
+     * @param weight
      */
-    public void addDirectionlessVertex(N node1, N node2, int weight) {
+    public void addDirectionlessEdge(N node1, N node2, int weight) {
         addEdge(node1, node2, weight);
         addEdge(node2, node1, weight);
     }
@@ -121,6 +133,7 @@ public class Graph<N> implements Iterable<Map.Entry<N, List<Graph.Edge<N>>>> {
     /**
      * @return Iterator over nodes
      */
+    @Override
     public Iterator<Entry<N, List<Edge<N>>>> iterator() {
         return nodes.entrySet().iterator();
     }
@@ -143,18 +156,24 @@ public class Graph<N> implements Iterable<Map.Entry<N, List<Graph.Edge<N>>>> {
         return nodes.keySet();
     }
 
+    private void ensure(N n) {
+        if (!nodes.keySet().contains(n)) {
+            nodes.put(n, new ArrayDequeList<Edge<N>>());
+        }
+    }
+
     /**
      * Edge with certain weight.
-     * 
-     * @param <N> 
+     *
+     * @param <N>
      */
     public static class Edge<N> {
 
         private final N node;
         private int weight;
         private final boolean dummy;
-        
-        public Edge(N targetNode){
+
+        public Edge(N targetNode) {
             node = targetNode;
             dummy = true;
         }
@@ -177,7 +196,7 @@ public class Graph<N> implements Iterable<Map.Entry<N, List<Graph.Edge<N>>>> {
         public int hashCode() {
             int hash = 7;
             hash = 29 * hash + Objects.hashCode(this.node);
-            if(!dummy) {
+            if (!dummy) {
                 hash = 29 * hash + this.weight;
             }
             return hash;
@@ -185,20 +204,14 @@ public class Graph<N> implements Iterable<Map.Entry<N, List<Graph.Edge<N>>>> {
 
         @Override
         public boolean equals(Object obj) {
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
+            if (obj == null || getClass() != obj.getClass()) {
                 return false;
             }
             final Edge<N> other = (Edge<N>) obj;
             if (!Objects.equals(this.node, other.node)) {
                 return false;
             }
-            if (!dummy && this.weight != other.weight) {
-                return false;
-            }
-            return true;
+            return dummy || other.dummy || this.weight == other.weight;
         }
     }
 }

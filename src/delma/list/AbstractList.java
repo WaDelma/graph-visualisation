@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  * This is to provide base implementation of certain list specific methods.
- * 
+ *
  * @author aopkarja
  */
 public abstract class AbstractList<T> extends AbstractCollection<T> implements List<T> {

@@ -8,35 +8,42 @@ public class Vector {
 
     /**
      *
-     * @param coord1
-     * @param coord2
-     * @return New coordinate where coord2 is considered as (0, 0)
+     * @param vector1
+     * @param vector2
+     * @return New coordinate where vector2 is considered as origo
      */
-    public static Vector diff(Vector coord1, Vector coord2) {
-        return new Vector(coord1.x - coord2.x, coord1.y - coord2.y);
+    public static Vector diff(Vector vector1, Vector vector2) {
+        return new Vector(vector1.x - vector2.x, vector1.y - vector2.y);
     }
 
     /**
      *
-     * @param coord1
-     * @param coord2
-     * @return Euclidean distance between coord1 and coord2
+     * @param vector1
+     * @param vector2
+     * @return Euclidean distance between vector1 and vector2
      */
-    public static double distance(Vector coord1, Vector coord2) {
-        double xDiff = coord1.x - coord2.x;
-        double yDiff = coord1.y - coord2.y;
-        return Math.sqrt(xDiff * xDiff + yDiff * yDiff);
+    public static double distance(Vector vector1, Vector vector2) {
+        return distance(vector1.x - vector2.x, vector1.y - vector2.y);
     }
 
-    static double distance(Vector coord) {
-        return Math.sqrt(coord.x * coord.x + coord.y * coord.y);
+    /**
+     *
+     * @param vector
+     * @return Euclidean distance between vector and origo
+     */
+    public static double distance(Vector vector) {
+        return distance(vector.x, vector.y);
+    }
+
+    private static double distance(double a, double b) {
+        return Math.sqrt(a * a + b * b);
     }
 
     public static Vector flip(Vector c) {
         return new Vector(-c.x, -c.y);
     }
     private double x, y;
-    private static final Vector ORIGIN = new Vector();
+    private static final Vector ORIGO = new Vector();
 
     /**
      * Creates coordinate object to place (x, y)
@@ -68,33 +75,33 @@ public class Vector {
     }
 
     /**
-     * Sets this coordinate to be at same place as c
+     * Sets this coordinate to be at same place as v
      *
-     * @param c
+     * @param v
      */
-    public void set(Vector c) {
-        x = c.x;
-        y = c.y;
+    public void set(Vector v) {
+        x = v.x;
+        y = v.y;
     }
 
     /**
-     * Moves this coordinate by c
+     * Moves this coordinate by v
      *
-     * @param c
+     * @param v
      */
-    public void add(Vector c) {
-        x += c.x;
-        y += c.y;
+    public void add(Vector v) {
+        x += v.x;
+        y += v.y;
     }
 
     /**
-     * Scales this coordinate by c
+     * Scales this coordinate by v
      *
-     * @param c
+     * @param v
      */
-    public void scale(Vector c) {
-        x *= c.x;
-        y *= c.y;
+    public void scale(Vector v) {
+        x *= v.x;
+        y *= v.y;
     }
 
     public void scale(double scale) {
@@ -103,22 +110,24 @@ public class Vector {
     }
 
     /**
-     * Rotates this coordinate around (0, 0) by angle radians
+     * Rotates this coordinate around origo by angle radians
      *
      * @param angle
      */
     public void rotate(double angle) {
         double sinAngle = Math.sin(angle);
         double cosAngle = Math.cos(angle);
-        x = x * cosAngle - y * sinAngle;
+        double tempX = x * cosAngle - y * sinAngle;
         y = x * sinAngle + y * cosAngle;
+        x = tempX;
+
     }
 
     /**
-     * Normalizes this
+     * Normalizes this vector.
      */
     public void normalize() {
-        double distanceFromOrigin = distance(ORIGIN, this);
+        double distanceFromOrigin = distance(this);
         if (distanceFromOrigin == 0) {
             return;
         }
@@ -152,5 +161,10 @@ public class Vector {
     @Override
     public String toString() {
         return "(" + x + ", " + y + ")";
+    }
+
+    public void clear() {
+        x = 0;
+        y = 0;
     }
 }

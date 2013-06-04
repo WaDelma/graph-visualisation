@@ -2,9 +2,8 @@ package delma.graph.visualisation.UI;
 
 import delma.graph.Graph;
 import delma.graph.Graph.Edge;
-import delma.graph.visualisation.GraphVisualisation;
-import delma.graph.visualisation.Vector;
 import delma.graph.visualisation.GraphVisualsGenerator;
+import delma.graph.visualisation.Vector;
 import delma.math.Constants;
 import java.awt.Color;
 import java.awt.Font;

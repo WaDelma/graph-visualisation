@@ -1,23 +1,30 @@
-
 package delma.utils;
 
 import delma.dequelist.ArrayDequeList;
-import java.util.Arrays;
 import java.util.Collection;
 
 /**
+ * Contains useful utilities.
  *
  * @author aopkarja
  */
-public class Utils {
-    public static <N> Collection<N> merge(Collection<N> a, Collection<N> b){
+public final class Utils {
+
+    /**
+     * Merges any number of collections to one
+     * 
+     * @param <N>
+     * @param collections
+     * @return 
+     */
+    public static <N> Collection<N> merge(Collection<N>... collections) {
         ArrayDequeList<N> result = new ArrayDequeList<>();
-        result.addAll(a);
-        result.addAll(b);
-        //System.out.println(Arrays.toString(a.toArray()));
-        //System.out.println(Arrays.toString(b.toArray()));
-        //System.out.println(Arrays.toString(result.toArray()));
-        //System.out.println(a.size() + " + " + b.size() + " = " + result.size() + "?");
+        for (Collection<N> c : collections) {
+            result.addAll(c);
+        }
         return result;
+    }
+
+    private Utils() {
     }
 }

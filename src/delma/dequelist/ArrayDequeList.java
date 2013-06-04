@@ -394,7 +394,8 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
     }
 
     /**
-     * Iterator, Descending iterator, List iterator and Sublist iterator in same.
+     * Iterator, Descending iterator, List iterator and Sublist iterator in
+     * same.
      */
     private class DequeListIterator implements ListIterator<E> {
 
@@ -402,7 +403,7 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
         private int expected;
         private boolean next;
         private final int amount;
-        private  int start, end;
+        private int start, end;
         private boolean noNext, noPrev;
 
         DequeListIterator(int start, int end, int amount) {

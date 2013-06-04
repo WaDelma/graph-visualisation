@@ -47,7 +47,7 @@ public class HashMap<K, V> implements Map<K, V> {
     public int size() {
         return size;
     }
-    
+
     @Override
     public boolean isEmpty() {
         return size == 0;
@@ -378,13 +378,13 @@ public class HashMap<K, V> implements Map<K, V> {
             return HashMap.this.remove((K) o) != null;
         }
     }
-    
+
     /**
      * Entry which is used in internal storage in HashMap.
+     *
      * @param <K> Key
      * @param <V> Value
      */
-
     private class Entry<K, V> implements Map.Entry<K, V> {
 
         private final K key;

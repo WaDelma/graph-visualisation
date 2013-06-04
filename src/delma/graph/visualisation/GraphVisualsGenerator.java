@@ -7,9 +7,9 @@ import delma.map.HashMap;
 import delma.utils.Utils;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 
 /**
@@ -18,80 +18,127 @@ import java.util.Random;
  */
 public class GraphVisualsGenerator<N> {
 
-    private Map<N, Vector> coordinateVectors;
+    private Map<N, Vector> positionVectors;
+    private HashMap<N, Vector> accelerationVectors;
+    private final HashMap<N, Vector> speedVectors;
     private final Graph<N> graph;
     private final Random rand;
-    private HashMap<N, Vector> forceVectors;
     private boolean stabilised = true;
 
     public GraphVisualsGenerator(Graph<N> graph) {
-        coordinateVectors = new HashMap<>();
+        positionVectors = new HashMap<>();
+        accelerationVectors = new HashMap<>();
+        speedVectors = new HashMap<>();
         this.graph = graph;
         rand = new Random();
     }
 
     public Vector getCoordinates(N n) {
-        return coordinateVectors.get(n);
+        return positionVectors.get(n);
     }
 
-    /*
-     * TODO: Improve this.
+    /**
+     * Initialises coordinate generation for graph.
      */
     public void initialise() {
         if (graph.size() == 0) {
             return;
         }
-        coordinateVectors.clear();
-        forceVectors = new HashMap<>();
+        positionVectors.clear();
+        accelerationVectors.clear();
+        speedVectors.clear();
+
         int size = graph.size() * 5;
         for (Map.Entry<N, List<Graph.Edge<N>>> temp : graph) {
             int tempX = rand.nextInt(size * 2) - size;
             int tempY = rand.nextInt(size * 2) - size;
-            coordinateVectors.put(temp.getKey(), new Vector(tempX, tempY));
-            forceVectors.put(temp.getKey(), new Vector());
+            positionVectors.put(temp.getKey(), new Vector(tempX, tempY));
+            accelerationVectors.put(temp.getKey(), new Vector());
+            speedVectors.put(temp.getKey(), new Vector());
         }
         stabilised = false;
     }
 
-    //TODO: How to make spring movement more controlled? How to ensure that equilibrium is achieved?
-    public void calculateCoords() {
+    /**
+     * Calculates coordinates for the graph.
+     */
+    public void coordinateCalculationStep() {
         if (graph.size() == 0 || stabilised) {
             return;
         }
-        for (Map.Entry<N, Vector> vectorEntry : coordinateVectors.entrySet()) {
-            Vector forceVector = forceVectors.get(vectorEntry.getKey());
-            for (Map.Entry<N, Vector> vertexVector : coordinateVectors.entrySet()) {
-                if (vertexVector.getKey() != vectorEntry.getKey()) {
-                    Vector edge = Vector.diff(vertexVector.getValue(), vectorEntry.getValue());
-                    Collection<Edge<N>> temp = Utils.merge(graph.getNeighbourNodes(vectorEntry.getKey()), graph.getNodesThatHaveThisNodeAsNeighbour(vectorEntry.getKey()));
-                    for (Edge<N> vertex : temp) {
-                        if (vertex.getNode().equals(vertexVector.getKey())) {
-                            Vector force = new Vector(edge);
-                            force.normalize();
-                            force.scale(Vector.distance(edge) - vertex.getWeight());
-                            force = Vector.flip(force);
-                            force.add(edge);
-                            forceVector.add(force);
-                        }
-                    }
-                    double repulseX = edge.getX() == 0 ? 0 : 1 / edge.getX();
-                    double repulseY = edge.getY() == 0 ? 0 : 1 / edge.getY();
-                    forceVector.add(new Vector(repulseX, repulseY));
-                }
+        applySprings();
+        applyRepulsion();
+        applyGlobalGravitation();
+        applyResistance();
+        update();
+    }
 
+    /**
+     * Applies spring physics to edges.
+     */
+    private void applySprings() {
+        for (Map.Entry<N, Vector> node : positionVectors.entrySet()) {
+            N nodeKey = node.getKey();
+            Vector acceleration = accelerationVectors.get(nodeKey);
+            for (Edge<N> vertex : Utils.merge(graph.getNeighbours(nodeKey), graph.getThoseThatHaveThisAsANeighbour(nodeKey))) {
+                Vector localVector = Vector.diff(positionVectors.get(vertex.getNode()), node.getValue());
+                Vector resultingForce = new Vector(localVector);
+                resultingForce.normalize();
+                resultingForce.scale(10 * vertex.getWeight() - Vector.distance(localVector));
+                resultingForce.scale(-0.4);
+                acceleration.add(resultingForce);
             }
-            
-            //Vector gravity = Vector.diff(new Vector(), vectorEntry.getValue());
-            //forceVector.add(new Vector(gravity.getX() == 0 ? 0 : 1 / gravity.getX(), gravity.getY() == 0 ? 0 : 1 / gravity.getY()));
-            //TODO: Global gravity? Does this help?
         }
-        
+    }
+
+    /**
+     * Applies repulsion between nodes.
+     */
+    private void applyRepulsion() {
+        for (Map.Entry<N, Vector> node : positionVectors.entrySet()) {
+            Vector acceleration = accelerationVectors.get(node.getKey());
+            for (Map.Entry<N, Vector> node2 : positionVectors.entrySet()) {
+                Vector localVector = Vector.diff(node.getValue(), node2.getValue());
+                double repulseX = localVector.getX() == 0 ? 0 : 1 / localVector.getX();
+                double repulseY = localVector.getY() == 0 ? 0 : 1 / localVector.getY();
+                acceleration.add(new Vector(repulseX, repulseY));
+                //acceleration.add(new Vector(repulseX, repulseY));
+            }
+        }
+    }
+
+    /**
+     * Applies global gravity towards origo.
+     */
+    private void applyGlobalGravitation() {
+        for (Map.Entry<N, Vector> node : positionVectors.entrySet()) {
+            Vector acceleration = accelerationVectors.get(node.getKey());
+            Vector localVector = node.getValue();
+            double gravitationX = localVector.getX() == 0 ? 0 : 1 / localVector.getX();
+            double gravitationY = localVector.getY() == 0 ? 0 : 1 / localVector.getY();
+            acceleration.add(new Vector(gravitationX, gravitationY));
+        }
+    }
+
+    private void applyResistance() {
+        for (Entry<N, Vector> speed : speedVectors.entrySet()) {
+            speed.getValue().scale(0.9);
+        }
+    }
+
+    private void update() {
         stabilised = true;
-        for (Map.Entry<N, Vector> forceEntry : forceVectors.entrySet()) {
-            if (Vector.distance(forceEntry.getValue()) > 0.01) {
+        for (N n : positionVectors.keySet()) {
+            Vector acceleration = accelerationVectors.get(n);
+            speedVectors.get(n).add(acceleration);
+            acceleration.clear();
+            if (Vector.distance(accelerationVectors.get(n)) > 1) {
                 stabilised = false;
             }
-            coordinateVectors.get(forceEntry.getKey()).add(forceEntry.getValue());
+            if (Vector.distance(speedVectors.get(n)) > 1) {
+                stabilised = false;
+            }
+            positionVectors.get(n).add(speedVectors.get(n));
         }
     }
 
@@ -146,7 +193,7 @@ public class GraphVisualsGenerator<N> {
         return new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                calculateCoords();
+                coordinateCalculationStep();
             }
         };
     }

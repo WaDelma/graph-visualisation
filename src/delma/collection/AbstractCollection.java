@@ -4,8 +4,9 @@ import java.util.Collection;
 import java.util.Iterator;
 
 /**
- * This is to provide base implementation of certain collection specific methods.
- * 
+ * This is to provide base implementation of certain collection specific
+ * methods.
+ *
  * @author aopkarja
  */
 public abstract class AbstractCollection<T> implements Collection<T> {

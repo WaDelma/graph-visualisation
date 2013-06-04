@@ -51,13 +51,18 @@ public class UIGraphVisualisation implements ActionListener {
                 menu.getAccessibleContext().setAccessibleDescription(
                         "Contains options for generating graphs");
                 menu.setMnemonic('g');
-
-                ActionListener listener = new ListenInSequence(new GraphGenerator(graph), visualsGenerator.getInitialisationListener(), visualsGenerator.getStepListener(), this);
+                GraphGenerator graphGenerator = new GraphGenerator(graph);
+                ActionListener listener = new ListenInSequence(graphGenerator, visualsGenerator.getInitialisationListener(), visualsGenerator.getStepListener(), this);
                 createMenuItem(menu, "Generate random graph", "Generates new graph", KeyStroke.getKeyStroke(KeyEvent.VK_G, 0), listener);
+
+                final GenerationEditorDialog dialog = new GenerationEditorDialog(frame, "Generation configuration", graphGenerator);
+                dialog.addFocusListener(dialog);
+                listener = dialog.getVisibilityToggleListener();
+                createMenuItem(menu, "Configurate random graph generator", "Allows editing how random graph is generated", KeyStroke.getKeyStroke(KeyEvent.VK_G, KeyEvent.CTRL_DOWN_MASK), listener);
 
                 listener = new ListenInSequence(visualsGenerator.getStepListener(), this);
                 createMenuItem(menu, "Step", "Step in iteration", KeyStroke.getKeyStroke(KeyEvent.VK_S, 0), listener);
-                
+
                 ActionListener a = visualsGenerator.getStepListener();
                 listener = new Repeat(new ListenInSequence(a, this), 1, visualsGenerator.getStepChecker(), true);
                 createMenuItem(menu, "Calculate", "Iterate until equilibrium", KeyStroke.getKeyStroke(KeyEvent.VK_C, 0), listener);
@@ -142,8 +147,8 @@ public class UIGraphVisualisation implements ActionListener {
 
         @Override
         public void actionPerformed(final ActionEvent e) {
-            if(active){
-                if(toggle){
+            if (active) {
+                if (toggle) {
                     active = false;
                 }
                 return;
@@ -154,12 +159,14 @@ public class UIGraphVisualisation implements ActionListener {
                     active = true;
                     while (active && req.check()) {
                         listener.actionPerformed(e);
-                        try {
-                            Thread.sleep(time);
-                        } catch (InterruptedException ex) {
-                            Logger.getLogger(UIGraphVisualisation.class.getName()).log(Level.SEVERE, null, ex);
+                        if (time > 0) {
+                            try {
+                                Thread.sleep(time);
+                            } catch (InterruptedException ex) {
+                                Logger.getLogger(UIGraphVisualisation.class.getName()).log(Level.SEVERE, null, ex);
+                            }
                         }
-                        
+
                     }
                     active = false;
                 }
@@ -169,6 +176,7 @@ public class UIGraphVisualisation implements ActionListener {
     }
 
     public static interface Requirement {
+
         public boolean check();
     }
 }

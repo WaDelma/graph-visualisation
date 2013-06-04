@@ -3,6 +3,8 @@ package delma.graph.visualisation;
 import delma.graph.Graph;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.Random;
 
 /**
@@ -12,9 +14,13 @@ import java.util.Random;
  */
 public class GraphGenerator implements ActionListener {
 
+    private int nodeCount = 100;
+    private int edgeCount = 50;
+    private int maxWeigth = 100;
+
     /**
      * Generates new random graph
-     * 
+     *
      * @param graph Graph to which new graph is generated
      * @param nodes Approximately how many nodes there will be
      * @param edges How many vertices there will be
@@ -25,7 +31,7 @@ public class GraphGenerator implements ActionListener {
         Random rand = new Random();
         for (int i = 0; i < nodes; i++) {
             String ID = "" + rand.nextInt(nodes * nodes);
-            if(!graph.getNodes().contains(ID)) {
+            if (!graph.getNodes().contains(ID)) {
                 graph.addNode(ID);
             }
         }
@@ -43,6 +49,45 @@ public class GraphGenerator implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        GraphGenerator.generate(graph, 25, 40, 100);
+        GraphGenerator.generate(graph, nodeCount, edgeCount, maxWeigth);
+    }
+
+    public PropertyChangeListener getNodeListener() {
+        return new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                nodeCount = (int) (long) evt.getNewValue();
+            }
+        };
+    }
+
+    public PropertyChangeListener getEdgeListener() {
+        return new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                edgeCount = (int) (long) evt.getNewValue();
+            }
+        };
+    }
+
+    public PropertyChangeListener getWeigthListener() {
+        return new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                maxWeigth = (int) (long) evt.getNewValue();
+            }
+        };
+    }
+
+    public int getNodeCount() {
+        return nodeCount;
+    }
+
+    public int getEdgeCount() {
+        return edgeCount;
+    }
+
+    public int getMaxWeigth() {
+        return maxWeigth;
     }
 }
