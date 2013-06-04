@@ -76,7 +76,7 @@ public class GraphVisualsGenerator<N> {
                     }
                     double repulseX = edge.getX() == 0 ? 0 : 1 / edge.getX();
                     double repulseY = edge.getY() == 0 ? 0 : 1 / edge.getY();
-                    //forceVector.add(new Vector(repulseX, repulseY));
+                    forceVector.add(new Vector(repulseX, repulseY));
                 }
 
             }

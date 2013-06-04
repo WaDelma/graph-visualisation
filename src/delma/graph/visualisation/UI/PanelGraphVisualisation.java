@@ -50,7 +50,7 @@ public class PanelGraphVisualisation extends JPanel implements ActionListener {
             }
             int fromX = (int) (curCoord.getX() * scale);
             int fromY = (int) (curCoord.getY() * scale);
-            
+
             g.setFont(new Font("Arial", 0, 10 + (int) (4 * scale)));
             g.setColor(new Color(100, 0, 150));
             g.drawString(cur.getKey(), fromX, fromY);
@@ -68,7 +68,7 @@ public class PanelGraphVisualisation extends JPanel implements ActionListener {
 
                     drawArrowHead(g, curCoord, tempCoord, 8, 0.03);
 
-                    g.setFont(new Font("Arial", 0, 10 + (int) (scale)));
+                    g.setFont(new Font("Arial", 0, 10 + (int) scale));
                     g.setColor(new Color(0, 100, 150));
                     g.drawString("" + vertex.getWeight(), toX + (fromX - toX) / 2, toY + (fromY - toY) / 2);
                     g.setColor(Color.BLACK);
