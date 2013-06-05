@@ -13,7 +13,17 @@ public class Vector {
      * @return New coordinate where vector2 is considered as origo
      */
     public static Vector diff(Vector vector1, Vector vector2) {
-        return new Vector(vector1.x - vector2.x, vector1.y - vector2.y);
+        double ax = 0, ay = 0;
+        if (vector1 != null) {
+            ax = vector1.x;
+            ay = vector1.y;
+        }
+        double bx = 0,by = 0;
+        if (vector2 != null) {
+            bx = vector2.x;
+            by = vector2.y;
+        }
+        return new Vector(ax - bx, ay - by);
     }
 
     /**
@@ -46,7 +56,7 @@ public class Vector {
     private static final Vector ORIGO = new Vector();
 
     /**
-     * Creates coordinate object to place (x, y)
+     * Creates vector to place (x, y)
      *
      * @param x
      * @param y
@@ -56,12 +66,17 @@ public class Vector {
         this.y = y;
     }
 
-    public Vector(Vector c) {
-        this(c.x, c.y);
+    /**
+     * Creates new vector that is identical to v
+     *
+     * @param v
+     */
+    public Vector(Vector v) {
+        this(v.x, v.y);
     }
 
     /**
-     * Creates coordinate object to place (0, 0)
+     * Creates coordinate object to place (0, 0).
      */
     public Vector() {
     }
@@ -75,64 +90,81 @@ public class Vector {
     }
 
     /**
-     * Sets this coordinate to be at same place as v
+     * Sets this vector to be at same place as v
      *
      * @param v
+     * @return this
      */
-    public void set(Vector v) {
+    public Vector set(Vector v) {
         x = v.x;
         y = v.y;
+        return this;
     }
 
     /**
-     * Moves this coordinate by v
+     * Moves this vector by v
      *
      * @param v
+     * @return this
      */
-    public void add(Vector v) {
+    public Vector add(Vector v) {
         x += v.x;
         y += v.y;
+        return this;
     }
 
     /**
-     * Scales this coordinate by v
+     * Scales this vector by v
      *
      * @param v
+     * @return this
      */
-    public void scale(Vector v) {
+    public Vector scale(Vector v) {
         x *= v.x;
         y *= v.y;
+        return this;
     }
 
-    public void scale(double scale) {
+    /**
+     * Scales this vector by scale
+     *
+     * @param scale
+     * @return this
+     */
+    public Vector scale(double scale) {
         x *= scale;
         y *= scale;
+        return this;
     }
 
     /**
      * Rotates this coordinate around origo by angle radians
      *
      * @param angle
+     * @return this
      */
-    public void rotate(double angle) {
+    public Vector rotate(double angle) {
         double sinAngle = Math.sin(angle);
         double cosAngle = Math.cos(angle);
         double tempX = x * cosAngle - y * sinAngle;
         y = x * sinAngle + y * cosAngle;
         x = tempX;
-
+        return this;
     }
 
     /**
      * Normalizes this vector.
+     *
+     * @return this
      */
-    public void normalize() {
+    public Vector normalize() {
         double distanceFromOrigin = distance(this);
         if (distanceFromOrigin == 0) {
-            return;
+            return this;
         }
         x /= distanceFromOrigin;
         y /= distanceFromOrigin;
+        return this;
     }
 
     @Override
@@ -166,5 +198,13 @@ public class Vector {
     public void clear() {
         x = 0;
         y = 0;
+    }
+
+    public int getXi() {
+        return (int) x;
+    }
+
+    public int getYi() {
+        return (int) y;
     }
 }

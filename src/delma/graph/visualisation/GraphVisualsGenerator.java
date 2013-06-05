@@ -19,11 +19,12 @@ import java.util.Random;
 public class GraphVisualsGenerator<N> {
 
     private Map<N, Vector> positionVectors;
-    private HashMap<N, Vector> accelerationVectors;
-    private final HashMap<N, Vector> speedVectors;
+    private Map<N, Vector> accelerationVectors;
+    private Map<N, Vector> speedVectors;
     private final Graph<N> graph;
     private final Random rand;
     private boolean stabilised = true;
+    private int steps;
 
     public GraphVisualsGenerator(Graph<N> graph) {
         positionVectors = new HashMap<>();
@@ -36,6 +37,10 @@ public class GraphVisualsGenerator<N> {
     public Vector getCoordinates(N n) {
         return positionVectors.get(n);
     }
+    
+    public int steps(){
+        return steps;
+    }
 
     /**
      * Initialises coordinate generation for graph.
@@ -44,10 +49,12 @@ public class GraphVisualsGenerator<N> {
         if (graph.size() == 0) {
             return;
         }
+        steps = 0;
+        
         positionVectors.clear();
         accelerationVectors.clear();
         speedVectors.clear();
-
+        
         int size = graph.size() * 5;
         for (Map.Entry<N, List<Graph.Edge<N>>> temp : graph) {
             int tempX = rand.nextInt(size * 2) - size;
@@ -68,9 +75,10 @@ public class GraphVisualsGenerator<N> {
         }
         applySprings();
         applyRepulsion();
+        applyFriction();
         applyGlobalGravitation();
-        applyResistance();
         update();
+        steps++;
     }
 
     /**
@@ -84,7 +92,7 @@ public class GraphVisualsGenerator<N> {
                 Vector localVector = Vector.diff(positionVectors.get(vertex.getNode()), node.getValue());
                 Vector resultingForce = new Vector(localVector);
                 resultingForce.normalize();
-                resultingForce.scale(10 * vertex.getWeight() - Vector.distance(localVector));
+                resultingForce.scale(Math.log(graph.size()) * vertex.getWeight() - Vector.distance(localVector));
                 resultingForce.scale(-0.4);
                 acceleration.add(resultingForce);
             }
@@ -120,7 +128,10 @@ public class GraphVisualsGenerator<N> {
         }
     }
 
-    private void applyResistance() {
+    /**
+     * Applies friction.
+     */
+    private void applyFriction() {
         for (Entry<N, Vector> speed : speedVectors.entrySet()) {
             speed.getValue().scale(0.9);
         }

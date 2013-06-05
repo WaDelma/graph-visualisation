@@ -37,18 +37,19 @@ public class PanelGraphVisualisation extends JPanel implements ActionListener {
     @Override
     public void paintComponent(Graphics g) {
         g.clearRect(0, 0, getWidth(), getHeight());
+
         int focusX = (int) (focus.getX() + getWidth() / 2.0);
         int focusY = (int) (focus.getY() + getHeight() / 2.0);
         g.translate(focusX, focusY);
 
         for (Iterator<Entry<String, List<Edge<String>>>> it = graph.iterator(); it.hasNext();) {
             Entry<String, List<Edge<String>>> cur = it.next();
-            Vector curCoord = generator.getCoordinates(cur.getKey());
-            if (curCoord == null) {
+            Vector fromVector = generator.getCoordinates(cur.getKey());
+            if (fromVector == null) {
                 continue;
             }
-            int fromX = (int) (curCoord.getX() * scale);
-            int fromY = (int) (curCoord.getY() * scale);
+            int fromX = (int) (fromVector.getX() * scale);
+            int fromY = (int) (fromVector.getY() * scale);
 
             g.setFont(new Font("Arial", 0, 10 + (int) (4 * scale)));
             g.setColor(new Color(100, 0, 150));
@@ -60,14 +61,14 @@ public class PanelGraphVisualisation extends JPanel implements ActionListener {
                 if (vertex.getNode().equals(cur.getKey())) {
                     //TODO: How to represent self vertices
                 } else {
-                    Vector tempCoord = generator.getCoordinates(vertex.getNode());
-                    int toX = (int) (tempCoord.getX() * scale);
-                    int toY = (int) (tempCoord.getY() * scale);
+                    Vector toVector = generator.getCoordinates(vertex.getNode());
+                    int toX = (int) (toVector.getX() * scale);
+                    int toY = (int) (toVector.getY() * scale);
                     g.drawLine(fromX, fromY, toX, toY);
 
-                    drawArrowHead(g, curCoord, tempCoord, 8, 0.03);
+                    drawArrowHead(g, fromVector, toVector, 8, 0.03);
 
-                    g.setFont(new Font("Arial", 0, 10 + (int) scale));
+                    g.setFont(new Font("Arial", 0, 8 + (int) (4 * scale)));
                     g.setColor(new Color(0, 100, 150));
                     g.drawString("" + vertex.getWeight(), toX + (fromX - toX) / 2, toY + (fromY - toY) / 2);
                     g.setColor(Color.BLACK);
@@ -76,6 +77,10 @@ public class PanelGraphVisualisation extends JPanel implements ActionListener {
 
         }
         g.translate(-focusX, -focusY);
+
+        g.setFont(new Font("Arial", 0, 14));
+        g.setColor(Color.BLACK);
+        g.drawString("Steps: " + generator.steps(), 0, 12);
     }
 
     public Vector getFocus() {
@@ -115,6 +120,5 @@ public class PanelGraphVisualisation extends JPanel implements ActionListener {
         int arrowX = (int) (arrowCoord.getX() * scale);
         int arrowY = (int) (arrowCoord.getY() * scale);
         arrow.addPoint(arrowX, arrowY);
-        //g.drawLine(arrowX, arrowY, targetX, targetY);
     }
 }

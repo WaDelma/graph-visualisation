@@ -104,7 +104,14 @@ public class Graph<N> implements Iterable<Map.Entry<N, List<Graph.Edge<N>>>> {
     public void addEdge(N from, N to, int weight) {
         ensure(from);
         ensure(to);
-        nodes.get(from).add(new Edge(to, weight));
+        List<Edge<N>> edgeList = nodes.get(from);
+        for (Edge<N> edge : edgeList) {
+            if (to.equals(edge.node)) {
+                edge.weight = weight;
+                return;
+            }
+        }
+        edgeList.add(new Edge(to, weight));
     }
 
     public void addDirectionlessEdge(N node1, N node2) {

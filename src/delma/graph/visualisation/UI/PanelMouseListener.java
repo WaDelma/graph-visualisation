@@ -59,10 +59,12 @@ public class PanelMouseListener implements MouseMotionListener, MouseListener, M
 
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
-        panel.setScale(panel.getScale() + -e.getPreciseWheelRotation() * Math.log(1.01 + panel.getScale()) * 0.5);
-        if (panel.getScale() < 0) {
-            panel.setScale(0);
+        double difference = e.getPreciseWheelRotation() * Math.log(1.01 + panel.getScale()) * 0.5;
+        if (panel.getScale() < difference) {
+            difference = 0;
         }
+        //panel.getFocus().add(new Vector(-difference, -difference));
+        panel.setScale(panel.getScale() - difference);
         panel.getParent().repaint();
     }
 }
