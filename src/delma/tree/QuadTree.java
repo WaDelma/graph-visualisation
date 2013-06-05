@@ -81,8 +81,8 @@ public class QuadTree<N> {
                 } else {
                     int quadrantX = center.getX() < getDivisionX() ? 0 : 1;
                     int quadrantY = center.getY() < getDivisionY() ? 0 : 1;
-                    subNodes[quadrantX][quadrantX] = new Node(calcMin(quadrantX, quadrantY), calcMax(quadrantX, quadrantY));
-                    subNodes[quadrantX][quadrantX].addBody(center, this.mass);
+                    subNodes[quadrantX][quadrantY] = new Node(calcMin(quadrantX, quadrantY), calcMax(quadrantX, quadrantY));
+                    subNodes[quadrantX][quadrantY].addBody(center, this.mass);
                     external = false;
                 }
             }
