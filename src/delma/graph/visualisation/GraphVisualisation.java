@@ -20,9 +20,13 @@ public class GraphVisualisation {
     }
     private Graph<String> graph;
     private UIGraphVisualisation UI;
+    private GraphVisualCalculator visualCalculator;
+    private GraphGenerator graphGenerator;
 
     public GraphVisualisation() {
         graph = new Graph<>();
-        UI = new UIGraphVisualisation(graph);
+        visualCalculator = new GraphVisualCalculator(graph);
+        graphGenerator = new GraphGenerator(graph);
+        UI = new UIGraphVisualisation(graph, visualCalculator, graphGenerator);
     }
 }

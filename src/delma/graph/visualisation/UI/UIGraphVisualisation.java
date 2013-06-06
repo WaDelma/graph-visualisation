@@ -2,7 +2,7 @@ package delma.graph.visualisation.UI;
 
 import delma.graph.Graph;
 import delma.graph.visualisation.GraphGenerator;
-import delma.graph.visualisation.GraphVisualsGenerator;
+import delma.graph.visualisation.GraphVisualCalculator;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -27,15 +27,13 @@ public class UIGraphVisualisation implements ActionListener {
     /**
      * @param graph Graph which is to be drawn to UI
      */
-    public UIGraphVisualisation(final Graph graph) {
+    public UIGraphVisualisation(final Graph graph, GraphVisualCalculator visualCalculator, GraphGenerator graphGenerator) {
         frame = new JFrame("Graph Visualiser");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(640, 480);
         frame.setBackground(Color.WHITE);
 
-        GraphVisualsGenerator visualsGenerator = new GraphVisualsGenerator(graph);
-
-        PanelGraphVisualisation panel = new PanelGraphVisualisation(graph, visualsGenerator);
+        PanelGraphVisualisation panel = new PanelGraphVisualisation(graph, visualCalculator);
         panel.setSize(640, 480);
 
         PanelMouseListener mouseListener = new PanelMouseListener(panel);
@@ -51,21 +49,34 @@ public class UIGraphVisualisation implements ActionListener {
                 menu.getAccessibleContext().setAccessibleDescription(
                         "Contains options for generating graphs");
                 menu.setMnemonic('g');
-                GraphGenerator graphGenerator = new GraphGenerator(graph);
-                ActionListener listener = new ListenInSequence(graphGenerator, visualsGenerator.getInitialisationListener(), visualsGenerator.getStepListener(), this);
+                ActionListener listener = new ListenInSequence(graphGenerator, visualCalculator.getInitialisationListener(), visualCalculator.getStepListener(), this);
                 createMenuItem(menu, "Generate random graph", "Generates new graph", KeyStroke.getKeyStroke(KeyEvent.VK_G, 0), listener);
 
-                final GenerationEditorDialog dialog = new GenerationEditorDialog(frame, "Generation configuration", graphGenerator);
+                EditorDialog dialog = new GenerationEditorDialog(frame, "Generation configuration", graphGenerator);
                 dialog.addFocusListener(dialog);
                 listener = dialog.getVisibilityToggleListener();
                 createMenuItem(menu, "Configurate random graph generator", "Allows editing how random graph is generated", KeyStroke.getKeyStroke(KeyEvent.VK_G, KeyEvent.CTRL_DOWN_MASK), listener);
+                
+            }
+            menuBar.add(menu);
 
-                listener = new ListenInSequence(visualsGenerator.getStepListener(), this);
+            menu = new JMenu("Calculation");
+            {
+                menu.getAccessibleContext().setAccessibleDescription(
+                        "Contains options for calculating visuals for graph");
+                menu.setMnemonic('c');
+                
+                ActionListener listener = new ListenInSequence(visualCalculator.getStepListener(), this);
                 createMenuItem(menu, "Step", "Step in iteration", KeyStroke.getKeyStroke(KeyEvent.VK_S, 0), listener);
 
-                ActionListener a = visualsGenerator.getStepListener();
-                listener = new Repeat(new ListenInSequence(a, this), 1, visualsGenerator.getStepChecker(), true);
+                ActionListener a = visualCalculator.getStepListener();
+                listener = new Repeat(new ListenInSequence(a, this), 1, visualCalculator.getStepChecker(), true);
                 createMenuItem(menu, "Calculate", "Iterate until equilibrium", KeyStroke.getKeyStroke(KeyEvent.VK_C, 0), listener);
+                
+                EditorDialog dialog = new CalculationEditorDialog(frame, "Calculation configuration", visualCalculator);
+                dialog.addFocusListener(dialog);
+                listener = dialog.getVisibilityToggleListener();
+                createMenuItem(menu, "Configurate visual calculation", "Allows editing how graph visual is calculated", KeyStroke.getKeyStroke(KeyEvent.VK_C, KeyEvent.CTRL_DOWN_MASK), listener);
             }
             menuBar.add(menu);
 
@@ -75,7 +86,7 @@ public class UIGraphVisualisation implements ActionListener {
                         "Contains actions regarding window");
                 menu.setMnemonic('w');
 
-                ActionListener listener = new ListenInSequence(visualsGenerator.getInitialisationListener(), visualsGenerator.getStepListener(), this);
+                ActionListener listener = new ListenInSequence(visualCalculator.getInitialisationListener(), visualCalculator.getStepListener(), this);
                 createMenuItem(menu, "Refresh", "Refresh drawing of graph", KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0), listener);
 
                 listener = new ListenInSequence(panel, this);

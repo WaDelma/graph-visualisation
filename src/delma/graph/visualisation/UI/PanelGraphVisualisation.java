@@ -2,7 +2,7 @@ package delma.graph.visualisation.UI;
 
 import delma.graph.Graph;
 import delma.graph.Graph.Edge;
-import delma.graph.visualisation.GraphVisualsGenerator;
+import delma.graph.visualisation.GraphVisualCalculator;
 import delma.graph.visualisation.Vector;
 import delma.math.Constants;
 import java.awt.Color;
@@ -24,11 +24,11 @@ import javax.swing.JPanel;
 public class PanelGraphVisualisation extends JPanel implements ActionListener {
 
     private final Graph<String> graph;
-    private final GraphVisualsGenerator<String> generator;
+    private final GraphVisualCalculator<String> generator;
     private Vector focus;
     private double scale = 1;
 
-    public PanelGraphVisualisation(Graph<String> graph, GraphVisualsGenerator generator) {
+    public PanelGraphVisualisation(Graph<String> graph, GraphVisualCalculator generator) {
         this.graph = graph;
         this.generator = generator;
         focus = new Vector();

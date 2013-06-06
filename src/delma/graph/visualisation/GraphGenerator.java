@@ -56,7 +56,7 @@ public class GraphGenerator implements ActionListener {
         return new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
-                nodeCount = (int) (long) evt.getNewValue();
+                nodeCount = (int) evt.getNewValue();
             }
         };
     }
@@ -65,7 +65,7 @@ public class GraphGenerator implements ActionListener {
         return new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
-                edgeCount = (int) (long) evt.getNewValue();
+                edgeCount = (int) evt.getNewValue();
             }
         };
     }
