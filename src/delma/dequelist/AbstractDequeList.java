@@ -9,7 +9,7 @@ import java.util.NoSuchElementException;
  *
  * @author Antti
  */
-public abstract class AbstractDequeList<E> extends AbstractList<E> implements Deque<E> {
+public abstract class AbstractDequeList<E> extends AbstractList<E> implements DequeList<E> {
 
     @Override
     public boolean offerFirst(E e) {
@@ -115,10 +115,4 @@ public abstract class AbstractDequeList<E> extends AbstractList<E> implements De
     public boolean remove(Object o) {
         return removeFirstOccurrence(o);
     }
-
-    /**
-     *
-     * @return Amount of elements that can be stored without expanding storage.
-     */
-    abstract int capacity();
 }

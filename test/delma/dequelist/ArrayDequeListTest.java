@@ -13,9 +13,9 @@ import org.junit.Test;
  */
 public class ArrayDequeListTest {
 
-    private ArrayDequeList emptyList;
-    private ArrayDequeList arrayList;
-    private ArrayDequeList collectionList;
+    private DequeList emptyList;
+    private DequeList arrayList;
+    private DequeList collectionList;
     private Collection collection;
     private final String[] array = {"A", "B", "C"};
 

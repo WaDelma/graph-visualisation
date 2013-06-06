@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 // TODO: Barnes–Hut simulation
 /**
@@ -14,102 +15,149 @@ import java.util.Map;
 public class QuadTree<N> {
 
     private Node root;
+    private double graduality;
+    private static final double DEFAULT_GRADUALITY = 0.001;
 
-    public QuadTree(Map<N, Vector> points, Map<N, Double> masses) {
-        Vector min = getMinXYVector(points.values());
-        Vector max = getMaxXYVector(points.values());
-        root = new Node(min, max);
-        for (Iterator<N> it = points.keySet().iterator(); it.hasNext();) {
-            N n = it.next();
-            Double mass = masses.get(n);
-            root.addBody(points.get(n), mass == null ? 1 : mass);
+    public QuadTree(Map<N, Vector> bodies, Map<N, Double> masses, double defaultMass) {
+        this(bodies, masses, defaultMass, DEFAULT_GRADUALITY);
+    }
+
+    /**
+     * Creates and populates new QuadTree using vectors and masses. If there is
+     * no mass defined for body default is used instead.
+     *
+     * @param bodies
+     * @param masses
+     * @param defaultMass
+     * @param graduality How close Vectors are considered equals
+     */
+    public QuadTree(Map<N, Vector> bodies, Map<N, Double> masses, double defaultMass, double graduality) {
+        this();
+        this.graduality = graduality;
+        for (Iterator<Entry<N, Vector>> it = bodies.entrySet().iterator(); it.hasNext();) {
+            Entry<N, Vector> temp = it.next();
+            Double mass = masses.get(temp.getKey());
+            root.addBody(temp.getKey(), temp.getValue(), mass == null ? defaultMass : mass);
         }
     }
 
-    private Vector getMinXYVector(Collection<Vector> points) {
-        double minX = Double.MAX_VALUE;
-        double minY = Double.MAX_VALUE;
-        for (Vector vector : points) {
-            if (vector.getX() < minX) {
-                minX = vector.getX();
-            }
-            if (vector.getY() < minY) {
-                minY = vector.getY();
-            }
+    public QuadTree(Map<N, Vector> bodies) {
+        this(bodies, DEFAULT_GRADUALITY);
+    }
+    
+    /**
+     * Creates and populates new QuadTree using vectors. Masses are set to 1.
+     * 
+     * @param bodies
+     * @param graduality How close Vectors are considered equals
+     */
+
+    public QuadTree(Map<N, Vector> bodies, double graduality) {
+        this();
+        this.graduality = graduality;
+        for (Iterator<Entry<N, Vector>> it = bodies.entrySet().iterator(); it.hasNext();) {
+            Entry<N, Vector> temp = it.next();
+            root.addBody(temp.getKey(), temp.getValue(), 1);
         }
-        return new Vector(minX, minY);
     }
 
-    private Vector getMaxXYVector(Collection<Vector> points) {
-        double maxX = Double.MIN_VALUE;
-        double maxY = Double.MIN_VALUE;
-        for (Vector vector : points) {
-            if (vector.getX() > maxX) {
-                maxX = vector.getX();
-            }
-            if (vector.getY() > maxY) {
-                maxY = vector.getY();
-            }
-        }
-        return new Vector(maxX, maxY);
+    public QuadTree() {
+        graduality = DEFAULT_GRADUALITY;
+        Vector min = new Vector(Integer.MIN_VALUE, Integer.MIN_VALUE);
+        Vector max = new Vector(Integer.MAX_VALUE, Integer.MAX_VALUE);
+        root = new QuadTree.Node(min, max);
     }
 
-    private static class Node {
+    /**
+     * Adds body with certain mass to the tree.
+     *
+     * @param n
+     * @param vector
+     * @param mass
+     * @return Did adding succeed
+     */
+    public boolean addBody(N n, Vector vector, double mass) {
+        return root.addBody(n, vector, mass);
+    }
+
+    public Node getRoot() {
+        return root;
+    }
+
+    /**
+     * Node for QuadTree. Contains 0, 1 bodies or 4 sub nodes.
+     */
+    public class Node<N> {
 
         private Vector center;
         private double mass;
         private Node[][] subNodes;
         private boolean external;
         private Vector min, max;
-        private int count;
+        private N n;
 
-        public Node(Vector min, Vector max) {
+        private Node(Vector min, Vector max) {
             this.min = min;
             this.max = max;
-            subNodes = new Node[2][2];
+            subNodes = new QuadTree.Node[2][2];
             external = true;
-            count = 0;
         }
 
-        public void addBody(Vector vector, double mass) {
-            count++;
+        private boolean addBody(N n, Vector vector, double mass) {
             if (external) {
                 if (center == null) {
-                    center = vector;
+                    center = new Vector(vector).scale(mass);
                     this.mass = mass;
-                    return;
+                    this.n = n;
+                    return true;
                 } else {
-                    int quadrantX = center.getX() < getDivisionX() ? 0 : 1;
-                    int quadrantY = center.getY() < getDivisionY() ? 0 : 1;
+                    Vector temp = new Vector(center).scale(1 / this.mass);
+                    if (Vector.equals(temp, vector, graduality)) {
+                        return false;
+                    }
+                    int quadrantX = temp.getX() < getDivisionX() ? 0 : 1;
+                    int quadrantY = temp.getY() < getDivisionY() ? 0 : 1;
+                    //System.out.println(quadrantX + " " + quadrantY + " " + vector + " " + center);
+                    //System.out.println(min + " " + max);
+                    //System.out.println(getDivisionX() + " " + getDivisionY());
+                    //System.out.println(isInsideArea(vector) + " " + isInsideArea(center));
                     subNodes[quadrantX][quadrantY] = new Node(calcMin(quadrantX, quadrantY), calcMax(quadrantX, quadrantY));
-                    subNodes[quadrantX][quadrantY].addBody(center, this.mass);
+                    subNodes[quadrantX][quadrantY].addBody(this.n, temp, this.mass);
                     external = false;
+                    this.n = null;
                 }
             }
-            center.add(new Vector(vector).scale(mass));
-            this.mass += mass;
             int quadrantX = vector.getX() < getDivisionX() ? 0 : 1;
             int quadrantY = vector.getY() < getDivisionY() ? 0 : 1;
             if (subNodes[quadrantX][quadrantY] == null) {
                 subNodes[quadrantX][quadrantY] = new Node(calcMin(quadrantX, quadrantY), calcMax(quadrantX, quadrantY));
             }
-            subNodes[quadrantX][quadrantY].addBody(vector, mass);
+            if (subNodes[quadrantX][quadrantY].addBody(n, vector, mass)) {
+                center.add(new Vector(vector).scale(mass));
+                this.mass += mass;
+                return true;
+            }
+            return false;
         }
 
-        private Vector calcMin(double quadrantX, double quadrantY) {
-            return new Vector(min.getX() + quadrantX * getDivisionX(), min.getY() + quadrantY * getDivisionY());
+        private Vector calcMin(int quadrantX, int quadrantY) {
+            double xx = quadrantX == 0 ? min.getX() : getDivisionX();
+            double yy = quadrantY == 0 ? min.getY() : getDivisionY();
+            return new Vector(xx, yy);
         }
 
-        private Vector calcMax(double quadrantX, double quadrantY) {
-            return new Vector(max.getX() - quadrantX * getDivisionX(), max.getY() - quadrantY * getDivisionY());
+        private Vector calcMax(int quadrantX, double quadrantY) {
+            double xx = quadrantX == 0 ? getDivisionX() : max.getX();
+            double yy = quadrantY == 0 ? getDivisionY() : max.getY();
+            return new Vector(xx, yy);
         }
 
         private double getDivisionX() {
-            return (max.getX() - min.getX()) / 2;
+            return (max.getX() + min.getX()) / 2;
         }
 
         private double getDivisionY() {
-            return (max.getY() - min.getY()) / 2;
+            return (max.getY() + min.getY()) / 2;
         }
 
         public double getMass() {
@@ -118,6 +166,36 @@ public class QuadTree<N> {
 
         public Vector getMassCenter() {
             return new Vector(center).scale(1 / mass);
+        }
+
+        public double getWidth() {
+            return max.getX() - min.getX();
+        }
+
+        public double getHeight() {
+            return max.getY() - min.getY();
+        }
+
+        public QuadTree.Node[][] getSubNodes() {
+            return subNodes;
+        }
+
+        public boolean isExternal() {
+            return external;
+        }
+
+        public N getKey() {
+            return n;
+        }
+
+        private boolean isInsideArea(Vector vector) {
+            if(min.getX() <= vector.getX() && vector.getX() <= max.getX()){
+                return true;
+            }
+            if(min.getY() <= vector.getY() && vector.getY() <= max.getY()){
+                return true;
+            }
+            return false;
         }
     }
 }

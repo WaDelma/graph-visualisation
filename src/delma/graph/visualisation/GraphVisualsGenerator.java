@@ -4,6 +4,8 @@ import delma.graph.Graph;
 import delma.graph.Graph.Edge;
 import delma.graph.visualisation.UI.UIGraphVisualisation.Requirement;
 import delma.map.HashMap;
+import delma.tree.QuadTree;
+import delma.tree.QuadTree.Node;
 import delma.utils.Utils;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -25,6 +27,8 @@ public class GraphVisualsGenerator<N> {
     private final Random rand;
     private boolean stabilised = true;
     private int steps;
+    private QuadTree quadTree;
+    private double tressHold = 0.5;
 
     public GraphVisualsGenerator(Graph<N> graph) {
         positionVectors = new HashMap<>();
@@ -37,8 +41,8 @@ public class GraphVisualsGenerator<N> {
     public Vector getCoordinates(N n) {
         return positionVectors.get(n);
     }
-    
-    public int steps(){
+
+    public int steps() {
         return steps;
     }
 
@@ -50,11 +54,11 @@ public class GraphVisualsGenerator<N> {
             return;
         }
         steps = 0;
-        
+
         positionVectors.clear();
         accelerationVectors.clear();
         speedVectors.clear();
-        
+
         int size = graph.size() * 5;
         for (Map.Entry<N, List<Graph.Edge<N>>> temp : graph) {
             int tempX = rand.nextInt(size * 2) - size;
@@ -63,6 +67,7 @@ public class GraphVisualsGenerator<N> {
             accelerationVectors.put(temp.getKey(), new Vector());
             speedVectors.put(temp.getKey(), new Vector());
         }
+        quadTree = new QuadTree(positionVectors);
         stabilised = false;
     }
 
@@ -105,12 +110,33 @@ public class GraphVisualsGenerator<N> {
     private void applyRepulsion() {
         for (Map.Entry<N, Vector> node : positionVectors.entrySet()) {
             Vector acceleration = accelerationVectors.get(node.getKey());
-            for (Map.Entry<N, Vector> node2 : positionVectors.entrySet()) {
-                Vector localVector = Vector.diff(node.getValue(), node2.getValue());
-                double repulseX = localVector.getX() == 0 ? 0 : 1 / localVector.getX();
-                double repulseY = localVector.getY() == 0 ? 0 : 1 / localVector.getY();
-                acceleration.add(new Vector(repulseX, repulseY));
-                //acceleration.add(new Vector(repulseX, repulseY));
+            recurse(quadTree.getRoot(), node.getValue(), acceleration);
+            /*
+             for (Map.Entry<N, Vector> node2 : positionVectors.entrySet()) {
+             Vector localVector = Vector.diff(node.getValue(), node2.getValue());
+             double repulseX = localVector.getX() == 0 ? 0 : 1 / localVector.getX();
+             double repulseY = localVector.getY() == 0 ? 0 : 1 / localVector.getY();
+             acceleration.add(new Vector(repulseX, repulseY));
+             //acceleration.add(new Vector(repulseX, repulseY));
+             }*/
+        }
+    }
+
+    private void recurse(Node node, Vector vector, Vector acceleration) {
+        if(node == null){
+            return;
+        }
+        if (node.isExternal() || node.getWidth() / Vector.distance(vector, node.getMassCenter()) < tressHold) {
+            Vector localVector = Vector.diff(vector, node.getMassCenter());
+            double repulseX = localVector.getX() == 0 ? 0 : 1 / localVector.getX();
+            double repulseY = localVector.getY() == 0 ? 0 : 1 / localVector.getY();
+            acceleration.add(new Vector(repulseX, repulseY));
+        } else {
+            Node[][] temp = node.getSubNodes();
+            for (Node[] nodes : temp) {
+                for (Node node1 : nodes) {
+                        recurse(node1, vector, acceleration);
+                }
             }
         }
     }
@@ -151,6 +177,7 @@ public class GraphVisualsGenerator<N> {
             }
             positionVectors.get(n).add(speedVectors.get(n));
         }
+        quadTree = new QuadTree(positionVectors);
     }
 
     public boolean isStabilised() {

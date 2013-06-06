@@ -18,7 +18,7 @@ public class Vector {
             ax = vector1.x;
             ay = vector1.y;
         }
-        double bx = 0,by = 0;
+        double bx = 0, by = 0;
         if (vector2 != null) {
             bx = vector2.x;
             by = vector2.y;
@@ -52,6 +52,11 @@ public class Vector {
     public static Vector flip(Vector c) {
         return new Vector(-c.x, -c.y);
     }
+
+    public static boolean equals(Vector vector1, Vector vector2, double delta) {
+        return distance(vector1, vector2) < delta;
+    }
+    
     private double x, y;
     private static final Vector ORIGO = new Vector();
 
@@ -198,13 +203,5 @@ public class Vector {
     public void clear() {
         x = 0;
         y = 0;
-    }
-
-    public int getXi() {
-        return (int) x;
-    }
-
-    public int getYi() {
-        return (int) y;
     }
 }
