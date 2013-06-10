@@ -1,7 +1,6 @@
 package delma.dequelist;
 
 import delma.list.AbstractList;
-import java.util.Deque;
 import java.util.NoSuchElementException;
 
 /**

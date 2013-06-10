@@ -1,15 +1,13 @@
 package delma.tree;
 
 import delma.graph.visualisation.Vector;
-import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-// TODO: Barnes–Hut simulation
 /**
- *
+ * Quad tree for Barnes–Hut simulation
+ * 
  * @author aopkarja
  */
 public class QuadTree<N> {
@@ -117,10 +115,6 @@ public class QuadTree<N> {
                     }
                     int quadrantX = temp.getX() < getDivisionX() ? 0 : 1;
                     int quadrantY = temp.getY() < getDivisionY() ? 0 : 1;
-                    //System.out.println(quadrantX + " " + quadrantY + " " + vector + " " + center);
-                    //System.out.println(min + " " + max);
-                    //System.out.println(getDivisionX() + " " + getDivisionY());
-                    //System.out.println(isInsideArea(vector) + " " + isInsideArea(center));
                     subNodes[quadrantX][quadrantY] = new Node(calcMin(quadrantX, quadrantY), calcMax(quadrantX, quadrantY));
                     subNodes[quadrantX][quadrantY].addBody(this.n, temp, this.mass);
                     external = false;

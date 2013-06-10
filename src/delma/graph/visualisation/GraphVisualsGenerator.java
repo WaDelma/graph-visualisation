@@ -9,6 +9,7 @@ import delma.tree.QuadTree.Node;
 import delma.utils.Utils;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -60,7 +61,7 @@ public class GraphVisualsGenerator<N> {
         speedVectors.clear();
 
         int size = graph.size() * 5;
-        for (Map.Entry<N, List<Graph.Edge<N>>> temp : graph) {
+        for (Map.Entry<N, List<Edge<N>>> temp : graph) {
             int tempX = rand.nextInt(size * 2) - size;
             int tempY = rand.nextInt(size * 2) - size;
             positionVectors.put(temp.getKey(), new Vector(tempX, tempY));
@@ -93,7 +94,8 @@ public class GraphVisualsGenerator<N> {
         for (Map.Entry<N, Vector> node : positionVectors.entrySet()) {
             N nodeKey = node.getKey();
             Vector acceleration = accelerationVectors.get(nodeKey);
-            for (Edge<N> vertex : Utils.merge(graph.getNeighbours(nodeKey), graph.getThoseThatHaveThisAsANeighbour(nodeKey))) {
+            Collection<Edge<N>> merged = Utils.merge(graph.getNeighbours(nodeKey), graph.getTranspose().getNeighbours(nodeKey));
+            for (Edge<N> vertex : merged) {
                 Vector localVector = Vector.diff(positionVectors.get(vertex.getNode()), node.getValue());
                 Vector resultingForce = new Vector(localVector);
                 resultingForce.normalize();

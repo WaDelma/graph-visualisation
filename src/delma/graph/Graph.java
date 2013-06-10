@@ -1,98 +1,39 @@
 package delma.graph;
 
-import delma.dequelist.ArrayDequeList;
-import delma.map.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Random;
 import java.util.Set;
 
 /**
- * Graph which
- *
+ *  Graph
+ * 
  * @author Antti
  */
-public class Graph<N> implements Iterable<Map.Entry<N, List<Graph.Edge<N>>>> {
-
-    private Map<N, List<Edge<N>>> nodes;
-    private final Random rand;
-
-    /**
-     * Create empty graph.
-     */
-    public Graph() {
-        this.nodes = new HashMap<>();
-        rand = new Random();
-    }
+public interface Graph<N> extends Iterable<Map.Entry<N, List<Graph.Edge<N>>>> {
 
     /**
      * Returns neighbour nodes of node specified.
      *
-     * O(1)
      *
      * @param node Node which neighbour nodes will be returned
      * @return List of neighbour nodes. If no neighbours, returns empty list
      * instead
      */
-    public List<Edge<N>> getNeighbours(N node) {
-        ensure(node);
-        return nodes.get(node);
-    }
-
-    /**
-     * Return nodes that has specified node as neighbour. Edges are flipped.
-     *
-     * O(n + m)
-     *
-     * @param node Node which is neighbours of nodes that will be returned
-     *
-     * @return
-     */
-    public List<Edge<N>> getThoseThatHaveThisAsANeighbour(N node) {
-        List<Edge<N>> result = new ArrayDequeList<>();
-        for (Iterator<Entry<N, List<Edge<N>>>> it = this.iterator(); it.hasNext();) {
-            Entry<N, List<Edge<N>>> entry = it.next();
-            for (Edge<N> n : entry.getValue()) {
-                if (node.equals(n.node)) {
-                    result.add(new Edge(entry.getKey(), n.getWeight()));
-                }
-            }
-        }
-        return result;
-    }
+    public List<Edge<N>> getNeighbours(N node);
 
     /**
      * Adds node to graph.
      *
      * @param node Node to be added
      */
-    public void addNode(N node) {
-        nodes.put(node, new ArrayDequeList<Edge<N>>());
-    }
+    public void addNode(N node);
 
     /**
      * Removes node from graph.
      *
      * @param node
      */
-    public void removeNode(N node) {
-        nodes.remove(node);
-        for (Iterator<Entry<N, List<Edge<N>>>> it = this.iterator(); it.hasNext();) {
-            List<Edge<N>> list = it.next().getValue();
-            for (int i = 0; i < list.size(); i++) {
-                if (list.get(i).node == node) {
-                    list.remove(i);
-                }
-            }
-        }
-    }
-
-    public void addEdge(N from, N to) {
-        addEdge(from, to, 1);
-    }
+    public void removeNode(N node);
 
     /**
      * Adds vertex from one node to another with certain weight.
@@ -101,22 +42,7 @@ public class Graph<N> implements Iterable<Map.Entry<N, List<Graph.Edge<N>>>> {
      * @param to
      * @param weight
      */
-    public void addEdge(N from, N to, int weight) {
-        ensure(from);
-        ensure(to);
-        List<Edge<N>> edgeList = nodes.get(from);
-        for (Edge<N> edge : edgeList) {
-            if (to.equals(edge.node)) {
-                edge.weight = weight;
-                return;
-            }
-        }
-        edgeList.add(new Edge(to, weight));
-    }
-
-    public void addDirectionlessEdge(N node1, N node2) {
-        addDirectionlessEdge(node1, node2, 1);
-    }
+    public void addEdge(N from, N to, int weight);
 
     /**
      * Adds directionless edge to graph with certain weight.
@@ -125,100 +51,45 @@ public class Graph<N> implements Iterable<Map.Entry<N, List<Graph.Edge<N>>>> {
      * @param node2
      * @param weight
      */
-    public void addDirectionlessEdge(N node1, N node2, int weight) {
-        addEdge(node1, node2, weight);
-        addEdge(node2, node1, weight);
-    }
+    public void addDirectionlessEdge(N node1, N node2, int weight);
 
     /**
      * Empties graph.
      */
-    public void clear() {
-        nodes.clear();
-    }
-
-    /**
-     * @return Iterator over nodes
-     */
-    @Override
-    public Iterator<Entry<N, List<Edge<N>>>> iterator() {
-        return nodes.entrySet().iterator();
-    }
+    public void clear();
 
     /**
      * @return Amount of nodes
      */
-    public int size() {
-        return nodes.size();
-    }
+    public int size();
+
+    public Set<N> getNodes();
 
     /**
+     * Transposes the graph.
+     *
+     * @return transposed version
+     */
+    public Graph<N> getTranspose();
+
+    /**
+     * Chooses random node.
+     * 
      * @return One randomly chosen node
      */
-    public N randomNode() {
-        return (N) nodes.keySet().toArray()[rand.nextInt(nodes.size())];
-    }
-
-    public Set<N> getNodes() {
-        return nodes.keySet();
-    }
-
-    private void ensure(N n) {
-        if (!nodes.keySet().contains(n)) {
-            nodes.put(n, new ArrayDequeList<Edge<N>>());
-        }
-    }
+    public N randomNode();
 
     /**
      * Edge with certain weight.
      *
      * @param <N>
      */
-    public static class Edge<N> {
+    public interface Edge<N> {
 
-        private final N node;
-        private int weight;
-        private final boolean dummy;
+        public N getNode();
 
-        public Edge(N targetNode) {
-            node = targetNode;
-            dummy = true;
-        }
+        public int getWeight();
 
-        private Edge(N targetNode, int weight) {
-            this.node = targetNode;
-            this.weight = weight;
-            dummy = false;
-        }
-
-        public N getNode() {
-            return node;
-        }
-
-        public int getWeight() {
-            return weight;
-        }
-
-        @Override
-        public int hashCode() {
-            int hash = 7;
-            hash = 29 * hash + Objects.hashCode(this.node);
-            if (!dummy) {
-                hash = 29 * hash + this.weight;
-            }
-            return hash;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == null || getClass() != obj.getClass()) {
-                return false;
-            }
-            final Edge<N> other = (Edge<N>) obj;
-            if (!Objects.equals(this.node, other.node)) {
-                return false;
-            }
-            return dummy || other.dummy || this.weight == other.weight;
-        }
+        public void setWeight(int weight);
     }
 }

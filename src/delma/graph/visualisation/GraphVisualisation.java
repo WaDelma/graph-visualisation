@@ -1,6 +1,7 @@
 package delma.graph.visualisation;
 
 import delma.graph.Graph;
+import delma.graph.GraphImpl;
 import delma.graph.visualisation.UI.UIGraphVisualisation;
 
 /**
@@ -22,7 +23,7 @@ public class GraphVisualisation {
     private UIGraphVisualisation UI;
 
     public GraphVisualisation() {
-        graph = new Graph<>();
+        graph = new GraphImpl<>();
         UI = new UIGraphVisualisation(graph);
     }
 }
