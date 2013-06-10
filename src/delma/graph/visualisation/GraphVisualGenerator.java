@@ -9,6 +9,8 @@ import delma.tree.QuadTree.Node;
 import delma.utils.Utils;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +21,7 @@ import java.util.Random;
  *
  * @author Antti
  */
-public class GraphVisualsGenerator<N> {
+public class GraphVisualGenerator<N> {
 
     private Map<N, Vector> positionVectors;
     private Map<N, Vector> accelerationVectors;
@@ -29,9 +31,9 @@ public class GraphVisualsGenerator<N> {
     private boolean stabilised = true;
     private int steps;
     private QuadTree quadTree;
-    private double tressHold = 0.5;
+    private double tressHold = 0.4;
 
-    public GraphVisualsGenerator(Graph<N> graph) {
+    public GraphVisualGenerator(Graph<N> graph) {
         positionVectors = new HashMap<>();
         accelerationVectors = new HashMap<>();
         speedVectors = new HashMap<>();
@@ -61,7 +63,7 @@ public class GraphVisualsGenerator<N> {
         speedVectors.clear();
 
         int size = graph.size() * 5;
-        for (Map.Entry<N, List<Edge<N>>> temp : graph) {
+        for (Map.Entry<N, List<Graph.Edge<N>>> temp : graph) {
             int tempX = rand.nextInt(size * 2) - size;
             int tempY = rand.nextInt(size * 2) - size;
             positionVectors.put(temp.getKey(), new Vector(tempX, tempY));
@@ -75,7 +77,7 @@ public class GraphVisualsGenerator<N> {
     /**
      * Calculates coordinates for the graph.
      */
-    public void coordinateCalculationStep() {
+    public void calculateStep() {
         if (graph.size() == 0 || stabilised) {
             return;
         }
@@ -125,7 +127,7 @@ public class GraphVisualsGenerator<N> {
     }
 
     private void recurse(Node node, Vector vector, Vector acceleration) {
-        if(node == null){
+        if (node == null) {
             return;
         }
         if (node.isExternal() || node.getWidth() / Vector.distance(vector, node.getMassCenter()) < tressHold) {
@@ -137,7 +139,7 @@ public class GraphVisualsGenerator<N> {
             Node[][] temp = node.getSubNodes();
             for (Node[] nodes : temp) {
                 for (Node node1 : nodes) {
-                        recurse(node1, vector, acceleration);
+                    recurse(node1, vector, acceleration);
                 }
             }
         }
@@ -233,9 +235,19 @@ public class GraphVisualsGenerator<N> {
         return new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                coordinateCalculationStep();
+                calculateStep();
             }
         };
+    }
+
+    public PropertyChangeListener getRepulsionListener() {
+        return new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                tressHold = (double) evt.getNewValue();
+            }
+        };
+
     }
 
     public Requirement getStepChecker() {
@@ -245,5 +257,9 @@ public class GraphVisualsGenerator<N> {
                 return !isStabilised();
             }
         };
+    }
+
+    public double getRepulsionOptimisation() {
+        return tressHold;
     }
 }
