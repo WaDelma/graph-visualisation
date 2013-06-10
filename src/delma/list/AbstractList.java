@@ -18,7 +18,7 @@ public abstract class AbstractList<T> extends AbstractCollection<T> implements L
         if (c.isEmpty()) {
             return false;
         }
-        ArrayDequeList temp = new ArrayDequeList(c);
+        ArrayDequeList<? extends T> temp = new ArrayDequeList<>(c);
         for (Iterator<? extends T> it = temp.descendingIterator(); it.hasNext();) {
             add(index, it.next());
         }
@@ -41,7 +41,7 @@ public abstract class AbstractList<T> extends AbstractCollection<T> implements L
     @Override
     public int lastIndexOf(Object o) {
         int i = size() - 1;
-        ArrayDequeList temp = new ArrayDequeList(this);
+        ArrayDequeList<T> temp = new ArrayDequeList<>(this);
         for (Iterator<T> it = temp.descendingIterator(); it.hasNext();) {
             T e = it.next();
             if (e == o || (e != null && e.equals(o))) {

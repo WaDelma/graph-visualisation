@@ -29,5 +29,6 @@ public class GraphVisualisation {
         visualCalculator = new GraphVisualGenerator(graph);
         graphGenerator = new GraphGenerator(graph);
         UI = new UIGraphVisualisation(graph, visualCalculator, graphGenerator);
+        UI.create();
     }
 }

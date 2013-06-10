@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- *  Graph
+ *  Graph in which N is used as indetifying key.
  * 
  * @author Antti
  */
@@ -59,9 +59,17 @@ public interface Graph<N> extends Iterable<Map.Entry<N, List<Graph.Edge<N>>>> {
     public void clear();
 
     /**
+     * Size of graph.
+     * 
      * @return Amount of nodes
      */
     public int size();
+    
+    /**
+     * Get set of the nodes in graph
+     * 
+     * @return Set of nodes
+     */
 
     public Set<N> getNodes();
 
@@ -79,6 +87,8 @@ public interface Graph<N> extends Iterable<Map.Entry<N, List<Graph.Edge<N>>>> {
      */
     public N randomNode();
 
+    public boolean isEmpty();
+
     /**
      * Edge with certain weight.
      *
@@ -91,5 +101,7 @@ public interface Graph<N> extends Iterable<Map.Entry<N, List<Graph.Edge<N>>>> {
         public int getWeight();
 
         public void setWeight(int weight);
+
+        public void setNode(N node);
     }
 }

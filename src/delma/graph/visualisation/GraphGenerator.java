@@ -26,7 +26,7 @@ public class GraphGenerator implements ActionListener {
      * @param edges How many vertices there will be
      * @param maxWeight How large weight can be
      */
-    public static void generate(Graph<Object> graph, int nodes, double edges, int maxWeight) {
+    public static void generate(Graph graph, int nodes, double edges, int maxWeight) {
         graph.clear();
         Random rand = new Random();
         for (int i = 0; i < nodes; i++) {
@@ -74,7 +74,7 @@ public class GraphGenerator implements ActionListener {
         return new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
-                maxWeigth = (int) (long) evt.getNewValue();
+                maxWeigth = (int) evt.getNewValue();
             }
         };
     }

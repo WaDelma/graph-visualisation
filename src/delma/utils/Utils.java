@@ -1,7 +1,11 @@
 package delma.utils;
 
 import delma.dequelist.ArrayDequeList;
+import delma.graph.visualisation.MultiLevel.Matched;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 
 /**
  * Contains useful utilities.
@@ -23,6 +27,14 @@ public final class Utils {
             result.addAll(c);
         }
         return result;
+    }
+
+    public static <N> void suffle(List<N> list) {
+        Random rand = new Random();
+        for (int i = list.size(); i >= 2; i--) {
+            int index = rand.nextInt(i);
+            list.set(i - 1, list.set(index, list.get(i - 1)));
+        }
     }
 
     private Utils() {

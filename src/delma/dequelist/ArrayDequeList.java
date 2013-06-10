@@ -62,6 +62,7 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
     @Override
     public void addFirst(E e) {
         if (isEmpty()) {
+            first = last = 0;
             data = new Object[1];
             data[first] = e;
             empty = false;
@@ -79,6 +80,7 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
     @Override
     public void addLast(E e) {
         if (isEmpty()) {
+            first = last = 0;
             data = new Object[1];
             data[last] = e;
             empty = false;
@@ -95,36 +97,41 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
 
     @Override
     public E pollFirst() {
-        Object o = data[first];
+        E e = access(first);
         data[first] = null;
         if (first != last) {
             first = modData(first + 1);
         } else {
             empty = true;
         }
-        return (E) o;
+        return e;
     }
 
     @Override
     public E pollLast() {
-        Object o = data[last];
+        E e = access(last);
         data[last] = null;
         if (first != last) {
             last = modData(last - 1);
         } else {
             empty = true;
         }
-        return (E) o;
+        return e;
     }
 
     @Override
     public E peekFirst() {
-        return (E) data[first];
+        return access(first);
     }
 
     @Override
     public E peekLast() {
-        return (E) data[last];
+        return access(last);
+    }
+
+    @SuppressWarnings("unchecked")
+    private E access(int index) {
+        return (E) data[index];
     }
 
     @Override
@@ -153,6 +160,9 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
     public int size() {
         if (isEmpty()) {
             return 0;
+        }
+        if (first == last) {
+            return 1;
         }
         if (first < last) {
             return last - first + 1;
@@ -185,16 +195,16 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
     @Override
     public E get(int index) {
         checkForBounds(index, size());
-        return (E) data[modData(first + index)];
+        return access(modData(first + index));
     }
 
     @Override
     public E set(int index, E element) {
         checkForBounds(index, size());
         int i = modData(first + index);
-        Object temp = data[i];
+        E temp = access(i);
         data[i] = element;
-        return (E) temp;
+        return temp;
     }
 
     @Override
@@ -205,11 +215,10 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
             empty = false;
             return;
         }
-        int i = modData(first + index);
-        if (i == last) {
+        if (modData(last + 1) == first) {
             ensureCapacity();
-            i = modData(first + index);
         }
+        int i = modData(first + index);
 
         if (first > last) {
             for (int j = last; j >= 0; j--) {
@@ -233,7 +242,7 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
     public E remove(int index) {
         checkForBounds(index, size());
         int i = modData(first + index);
-        Object o = data[i];
+        E e = access(i);
         if (first > last) {
             for (int j = i + 1; j < data.length; j++) {
                 data[j - 1] = data[j];
@@ -248,11 +257,12 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
             }
         }
         data[last] = null;
-        last = modData(last - 1);
         if (first == last) {
             empty = true;
+        } else {
+            last = modData(last - 1);
         }
-        return (E) o;
+        return e;
     }
 
     @Override
@@ -308,8 +318,23 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
 
     private void checkForBounds(int index, int size) throws IndexOutOfBoundsException {
         if (index < 0 || index > size) {
-            throw new IndexOutOfBoundsException();
+            throw new IndexOutOfBoundsException("0 <= " + index + " <= " + size);
         }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("(");
+        for (Iterator<E> it = this.iterator(); it.hasNext();) {
+            builder.append(it.next());
+            builder.append(", ");
+        }
+        if (builder.length() > 2) {
+            builder.setLength(builder.length() - 2);
+        }
+        builder.append(")");
+        return builder.toString();
     }
 
     /**
@@ -428,10 +453,10 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
             }
             noNext = cur == end;
             noPrev = false;
-            Object result = data[cur];
+            E result = access(cur);
             next = true;
             cur = modData(cur + amount);
-            return (E) result;
+            return result;
         }
 
         @Override
@@ -467,10 +492,10 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
             }
             noPrev = cur == start;
             noNext = false;
-            Object result = data[cur];
+            E result = access(cur);
             next = true;
             cur = modData(cur - amount);
-            return (E) result;
+            return result;
         }
 
         @Override

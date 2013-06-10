@@ -30,6 +30,18 @@ public class GraphImpl<N> implements Graph<N> {
         rand = new Random();
     }
 
+    public GraphImpl(Graph<N> graph) {
+        this();
+        for (Iterator<Map.Entry<N, List<Graph.Edge<N>>>> it = graph.iterator(); it.hasNext();) {
+            Entry<N, List<Graph.Edge<N>>> entry = it.next();
+            nodes.put(entry.getKey(), (List) new ArrayDequeList<>(entry.getValue()));
+        }
+        for (Iterator<Map.Entry<N, List<Graph.Edge<N>>>> it = graph.getTranspose().iterator(); it.hasNext();) {
+            Entry<N, List<Graph.Edge<N>>> entry = it.next();
+            transpose.put(entry.getKey(), (List) new ArrayDequeList<>(entry.getValue()));
+        }
+    }
+
     @Override
     public List<Graph.Edge<N>> getNeighbours(N node) {
         return internalGetNeighbours(node, nodes);
@@ -48,18 +60,16 @@ public class GraphImpl<N> implements Graph<N> {
 
     @Override
     public void removeNode(N node) {
-        internalRemove(node);
-        getTranspose();
-        internalRemove(node);
-        getTranspose();
+        internalRemove(node, nodes, this);
+        internalRemove(node, transpose, this.getTranspose());
     }
 
-    private void internalRemove(N node) {
+    private void internalRemove(N node, Map<N, List<Graph.Edge<N>>> nodes, Graph<N> graph) {
         nodes.remove(node);
-        for (Iterator<Entry<N, List<Graph.Edge<N>>>> it = this.iterator(); it.hasNext();) {
+        for (Iterator<Entry<N, List<Graph.Edge<N>>>> it = graph.iterator(); it.hasNext();) {
             List<Graph.Edge<N>> list = it.next().getValue();
             for (int i = 0; i < list.size(); i++) {
-                if (list.get(i).getNode() == node) {
+                if (list.get(i) != null && list.get(i).getNode() == node) {
                     list.remove(i);
                 }
             }
@@ -91,12 +101,15 @@ public class GraphImpl<N> implements Graph<N> {
         ensure(map, to);
         List<Graph.Edge<N>> edgeList = map.get(from);
         for (Graph.Edge<N> edge : edgeList) {
+            if(edge == null){
+                continue;
+            }
             if (to.equals(edge.getWeight())) {
                 edge.setWeight(weight);
                 return;
             }
         }
-        edgeList.add(new Edge(to, weight));
+        edgeList.add(new Edge<>(to, weight));
     }
 
     @Override
@@ -104,7 +117,6 @@ public class GraphImpl<N> implements Graph<N> {
         nodes.clear();
         transpose.clear();
     }
-
 
     @Override
     public Graph<N> getTranspose() {
@@ -116,13 +128,13 @@ public class GraphImpl<N> implements Graph<N> {
         return nodes.entrySet().iterator();
     }
 
-
     @Override
     public int size() {
         return nodes.size();
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public N randomNode() {
         return (N) nodes.keySet().toArray()[rand.nextInt(nodes.size())];
     }
@@ -138,12 +150,17 @@ public class GraphImpl<N> implements Graph<N> {
         }
     }
 
-    private static class Edge<N> implements Graph.Edge<N> {
+    @Override
+    public boolean isEmpty() {
+        return size() == 0;
+    }
 
-        private final N node;
+    public static class Edge<N> implements Graph.Edge<N> {
+        private boolean flag;
+        private N node;
         private int weight;
 
-        private Edge(N targetNode, int weight) {
+        public Edge(N targetNode, int weight) {
             this.node = targetNode;
             this.weight = weight;
         }
@@ -171,7 +188,8 @@ public class GraphImpl<N> implements Graph<N> {
             if (obj == null || getClass() != obj.getClass()) {
                 return false;
             }
-            final Edge<N> other = (Edge<N>) obj;
+            @SuppressWarnings("unchecked")
+            Edge<N> other = (Edge<N>) obj;
             if (!Objects.equals(this.node, other.node)) {
                 return false;
             }
@@ -182,6 +200,23 @@ public class GraphImpl<N> implements Graph<N> {
         public void setWeight(int weight) {
             this.weight = weight;
         }
+
+        @Override
+        public void setNode(N node) {
+            this.node = node;
+        }
+
+        @Override
+        public String toString() {
+            if(flag){
+                return "edge:{this}";
+            }
+            flag = true;
+            String tempNode = node.toString();
+            flag = false;
+            return "edge:{" + tempNode + "}:" + weight;
+        }
+        
     }
 
     private class Transpose implements Graph<N> {
@@ -242,6 +277,11 @@ public class GraphImpl<N> implements Graph<N> {
         @Override
         public N randomNode() {
             return GraphImpl.this.randomNode();
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return GraphImpl.this.isEmpty();
         }
     }
 }

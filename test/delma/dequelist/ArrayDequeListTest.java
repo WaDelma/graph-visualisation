@@ -3,6 +3,7 @@ package delma.dequelist;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -85,7 +86,7 @@ public class ArrayDequeListTest {
     }
 
     @Test()
-    public void EmptyingWorks() {
+    public void emptyingWorks() {
         int i = arrayList.size();
         while (i > 0) {
             arrayList.pop();
@@ -105,6 +106,21 @@ public class ArrayDequeListTest {
     public void removingNthWorks() {
         arrayList.remove(2);
         assertArrayEquals(new String[]{"A", "B"}, arrayList.toArray());
+        arrayList.remove(0);
+        assertArrayEquals(new String[]{"B"}, arrayList.toArray());
+        arrayList.remove(0);
+        assertArrayEquals(new String[]{}, arrayList.toArray());
+    }
+    
+    @Test()
+    public void sizeWorks(){
+        assertEquals(3, arrayList.size());
+        arrayList.remove();
+        assertEquals(2, arrayList.size());
+        arrayList.remove();
+        assertEquals(1, arrayList.size());
+        arrayList.remove();
+        assertEquals(0, arrayList.size());
     }
 
     @Test()
@@ -207,5 +223,13 @@ public class ArrayDequeListTest {
         }
         arrayList.subList(1, 2).add("O");
         assertEquals("O", arrayList.get(1));
+    }
+    
+    @Test()
+    public void removingWithIteratorWorks(){
+        for (Iterator it = arrayList.iterator(); it.hasNext();) {
+            it.next();
+            it.remove();
+        }
     }
 }

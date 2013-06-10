@@ -1,5 +1,6 @@
 package delma.collection;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -39,6 +40,7 @@ public abstract class AbstractCollection<T> implements Collection<T> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <E> E[] toArray(E[] a) {
         if (a.length >= size()) {
             int i = 0;
@@ -89,8 +91,8 @@ public abstract class AbstractCollection<T> implements Collection<T> {
 
     @Override
     public boolean containsAll(Collection<?> c) {
-        for (Iterator<? extends Object> it = c.iterator(); it.hasNext();) {
-            if (!contains((T) it.next())) {
+        for (Iterator it = c.iterator(); it.hasNext();) {
+            if (!contains(it.next())) {
                 return false;
             }
         }

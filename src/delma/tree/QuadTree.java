@@ -12,7 +12,7 @@ import java.util.Map.Entry;
  */
 public class QuadTree<N> {
 
-    private Node root;
+    private Node<N> root;
     private double graduality;
     private static final double DEFAULT_GRADUALITY = 0.001;
 
