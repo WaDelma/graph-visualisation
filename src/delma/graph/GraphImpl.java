@@ -104,7 +104,7 @@ public class GraphImpl<N> implements Graph<N> {
             if(edge == null){
                 continue;
             }
-            if (to.equals(edge.getWeight())) {
+            if (to.equals(edge.getNode())) {
                 edge.setWeight(weight);
                 return;
             }

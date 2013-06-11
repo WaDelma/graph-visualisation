@@ -16,15 +16,15 @@ public class lol {
 
     public static void main(String... args) {
         graph = new GraphImpl();
-        GraphGenerator.generate(graph, 10, 30, 100);
+        GraphGenerator.generate(graph, 10, 10, 100);
         MultiLevel multiLevel = new MultiLevel(graph);
         System.out.println("Started...");
         multiLevel.process();
         System.out.println("Done.");
-        for (Iterator<Matched> it = multiLevel.getRoot().iterator(); it.hasNext();) {
+        System.out.println(multiLevel.getRoots());
+        /*for (Iterator<Matched> it = multiLevel.getRoot().iterator(); it.hasNext();) {
             recurse(it.next());
-        }
-        
+        }*/
     }
 
     private static void recurse(Object m) {

@@ -59,7 +59,7 @@ public class PanelGraphVisualisation extends JPanel implements ActionListener {
             for (Iterator<Edge<String>> it1 = cur.getValue().iterator(); it1.hasNext();) {
                 Edge<String> vertex = it1.next();
                 if (vertex.getNode().equals(cur.getKey())) {
-                    //TODO: How to represent self vertices
+                    //TODO: How to represent self pointing edges
                 } else {
                     Vector toVector = generator.getCoordinates(vertex.getNode());
                     int toX = (int) (toVector.getX() * scale);

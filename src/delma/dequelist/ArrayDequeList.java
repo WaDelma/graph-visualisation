@@ -241,7 +241,10 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
     @Override
     public E remove(int index) {
         checkForBounds(index, size());
-        int i = modData(first + index);
+        return internalRemove(modData(first + index));
+    }
+
+    private E internalRemove(int i) {
         E e = access(i);
         if (first > last) {
             for (int j = i + 1; j < data.length; j++) {
@@ -465,7 +468,7 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
             if (next) {
                 cur = modData(cur - amount);
                 end = modData(end - 1);
-                ArrayDequeList.this.remove(cur);
+                ArrayDequeList.this.internalRemove(cur);
                 next = false;
                 expected--;
             } else {

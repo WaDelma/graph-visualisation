@@ -232,4 +232,13 @@ public class ArrayDequeListTest {
             it.remove();
         }
     }
+    
+    @Test()
+    public void removingObjectWorks(){
+        arrayList.removeFirst();
+        arrayList.remove("C");
+        assertArrayEquals(new String[]{"B"}, arrayList.toArray());
+        arrayList.remove("B");
+        assertArrayEquals(new String[]{}, arrayList.toArray());
+    }
 }
