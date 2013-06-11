@@ -86,24 +86,19 @@ public class HashMap<K, V> implements Map<K, V> {
 
     @Override
     public V put(K key, V value) {
-        int hash = getHash(key, data.length);
-        if (data[hash] == null) {
-            data[hash] = new Entry(key, value, null);
-            size++;
-        } else {
-            for (Entry e = data[hash]; e != null; e = e.next) {
-                if (equals(key, e.key)) {
-                    V temp = (V) e.value;
-                    e.value = value;
-                    if (size >= load * data.length) {
-                        ensureCapacity(data.length * 2);
-                    }
-                    return temp;
-                }
-            }
-            data[hash] = new Entry(key, value, data[hash]);
-            size++;
+        if (size >= load * data.length) {
+            ensureCapacity(data.length * 2);
         }
+        int hash = getHash(key, data.length);
+        for (Entry e = data[hash]; e != null; e = e.next) {
+            if (equals(key, e.key)) {
+                V temp = (V) e.value;
+                e.value = value;
+                return temp;
+            }
+        }
+        data[hash] = new Entry(key, value, data[hash]);
+        size++;
         return null;
     }
 

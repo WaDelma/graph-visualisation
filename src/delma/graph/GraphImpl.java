@@ -2,6 +2,7 @@ package delma.graph;
 
 import delma.dequelist.ArrayDequeList;
 import delma.map.HashMap;
+import delma.utils.Utils;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +55,9 @@ public class GraphImpl<N> implements Graph<N> {
 
     @Override
     public void addNode(N node) {
+        if(node == null){
+            return;
+        }
         nodes.put(node, new ArrayDequeList<Graph.Edge<N>>());
         transpose.put(node, new ArrayDequeList<Graph.Edge<N>>());
     }
@@ -97,11 +101,14 @@ public class GraphImpl<N> implements Graph<N> {
     }
 
     private void internalAdd(N from, N to, int weight, Map<N, List<Graph.Edge<N>>> map) {
+        if(from == null || to == null){
+            return;
+        }
         ensure(map, from);
         ensure(map, to);
         List<Graph.Edge<N>> edgeList = map.get(from);
         for (Graph.Edge<N> edge : edgeList) {
-            if(edge == null){
+            if (edge == null) {
                 continue;
             }
             if (to.equals(edge.getNode())) {
@@ -156,7 +163,6 @@ public class GraphImpl<N> implements Graph<N> {
     }
 
     public static class Edge<N> implements Graph.Edge<N> {
-        private boolean flag;
         private N node;
         private int weight;
 
@@ -208,15 +214,9 @@ public class GraphImpl<N> implements Graph<N> {
 
         @Override
         public String toString() {
-            if(flag){
-                return "edge:{this}";
-            }
-            flag = true;
-            String tempNode = node.toString();
-            flag = false;
+            String tempNode = Utils.toString(node);
             return "edge:{" + tempNode + "}:" + weight;
         }
-        
     }
 
     private class Transpose implements Graph<N> {

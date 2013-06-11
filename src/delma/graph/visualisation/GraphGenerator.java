@@ -5,6 +5,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Random;
 
 /**
@@ -38,7 +40,7 @@ public class GraphGenerator implements ActionListener {
         for (int i = 0; i < edges; i++) {
             Object node1 = graph.randomNode();
             Object node2 = graph.randomNode();
-            graph.addEdge("" + node1, "" + node2, rand.nextInt(maxWeight) + 1);
+            graph.addEdge(node1, node2, rand.nextInt(maxWeight) + 1);
         }
     }
     private final Graph graph;

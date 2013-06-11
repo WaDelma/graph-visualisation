@@ -2,8 +2,9 @@
 import delma.graph.Graph;
 import delma.graph.GraphImpl;
 import delma.graph.visualisation.GraphGenerator;
-import delma.graph.visualisation.MultiLevel;
-import delma.graph.visualisation.MultiLevel.Matched;
+import delma.graph.visualisation.visualGeneration.MultiLevel;
+import delma.graph.visualisation.visualGeneration.MultiLevel.Matched;
+import delma.utils.Utils;
 import java.util.Iterator;
 
 /**
@@ -21,20 +22,26 @@ public class lol {
         System.out.println("Started...");
         multiLevel.process();
         System.out.println("Done.");
-        System.out.println(multiLevel.getRoots());
-        /*for (Iterator<Matched> it = multiLevel.getRoot().iterator(); it.hasNext();) {
-            recurse(it.next());
-        }*/
+        for (Iterator<Matched> it = multiLevel.getRoots().iterator(); it.hasNext();) {
+            //recurse(it.next());
+            Matched temp = it.next();
+            System.out.println(temp.getN0());
+            System.out.println(temp.getN1());
+            System.out.println("---");
+        }
     }
 
     private static void recurse(Object m) {
-        if(m == null){
+        if (m == null) {
+            System.out.println("NULL");
             return;
         }
         if (m instanceof Matched) {
             Matched match = (Matched) m;
-            System.out.println(match.getN0() + ", " + match.getN1());
+            System.out.println(Utils.toString(match.getN0()) + ", " + Utils.toString(match.getN1()));
+            System.out.println("\\/");
             recurse(match.getN0());
+            System.out.println("/\\");
             recurse(match.getN1());
         }
     }

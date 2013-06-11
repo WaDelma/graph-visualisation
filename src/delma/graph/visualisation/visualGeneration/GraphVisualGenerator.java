@@ -1,17 +1,16 @@
-package delma.graph.visualisation;
+package delma.graph.visualisation.visualGeneration;
 
 import delma.graph.Graph;
 import delma.graph.Graph.Edge;
-import delma.graph.visualisation.UI.UIGraphVisualisation.Requirement;
+import delma.graph.visualisation.Vector;
 import delma.map.HashMap;
 import delma.tree.QuadTree;
 import delma.tree.QuadTree.Node;
 import delma.utils.Utils;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -21,7 +20,7 @@ import java.util.Random;
  *
  * @author Antti
  */
-public class GraphVisualGenerator<N> {
+public class GraphVisualGenerator<N> extends AbstractVisualGenerator<N> {
 
     private Map<N, Vector> positionVectors;
     private Map<N, Vector> accelerationVectors;
@@ -41,19 +40,19 @@ public class GraphVisualGenerator<N> {
         rand = new Random();
     }
 
+    @Override
     public Vector getCoordinates(N n) {
         return positionVectors.get(n);
     }
 
+    @Override
     public int steps() {
         return steps;
     }
 
-    /**
-     * Initialises coordinate generation for graph.
-     */
+    @Override
     public void initialise() {
-        if (graph.size() == 0) {
+        if (graph.isEmpty()) {
             return;
         }
         steps = 0;
@@ -74,17 +73,15 @@ public class GraphVisualGenerator<N> {
         stabilised = false;
     }
 
-    /**
-     * Calculates coordinates for the graph.
-     */
+    @Override
     public void calculateStep() {
-        if (graph.size() == 0 || stabilised) {
+        if (graph.isEmpty() || stabilised) {
             return;
         }
         applySprings();
         applyRepulsion();
         applyFriction();
-        applyGlobalGravitation();
+        //applyGlobalGravitation();
         update();
         steps++;
     }
@@ -184,7 +181,8 @@ public class GraphVisualGenerator<N> {
         quadTree = new QuadTree(positionVectors);
     }
 
-    public boolean isStabilised() {
+    @Override
+    public boolean isReady() {
         return stabilised;
     }
 
@@ -222,25 +220,9 @@ public class GraphVisualGenerator<N> {
      }
      }*/
     //}
-    public ActionListener getInitialisationListener() {
-        return new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                initialise();
-            }
-        };
-    }
-
-    public ActionListener getStepListener() {
-        return new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                calculateStep();
-            }
-        };
-    }
-
-    public PropertyChangeListener getRepulsionListener() {
+    
+    @Override
+    public PropertyChangeListener getOptimisationListener() {
         return new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
@@ -250,16 +232,24 @@ public class GraphVisualGenerator<N> {
 
     }
 
-    public Requirement getStepChecker() {
-        return new Requirement() {
-            @Override
-            public boolean check() {
-                return !isStabilised();
-            }
-        };
+    @Override
+    public double getOptimisation() {
+        return tressHold;
     }
 
-    public double getRepulsionOptimisation() {
-        return tressHold;
+    public void inherit(VisualGenerator generator, double d) {
+        if (generator == null) {
+            return;
+        }
+        for (Iterator<Entry<N, Vector>> it = positionVectors.entrySet().iterator(); it.hasNext();) {
+            Entry<N, Vector> entry = it.next();
+            Vector tempVector = generator.getCoordinates(entry.getKey());
+            if (tempVector != null) {
+                //System.out.println("ftw " + entry.getKey() + "="  + tempVector);
+                entry.setValue(tempVector).add(new Vector(rand.nextDouble() * d - d / 2, rand.nextDouble() * d - d / 2));
+            } else {
+                //System.out.println("wtf");
+            }
+        }
     }
 }

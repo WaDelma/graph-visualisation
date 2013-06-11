@@ -2,8 +2,9 @@ package delma.graph.visualisation.UI;
 
 import delma.graph.Graph;
 import delma.graph.Graph.Edge;
-import delma.graph.visualisation.GraphVisualGenerator;
 import delma.graph.visualisation.Vector;
+import delma.graph.visualisation.visualGeneration.MultiLevel.Matched;
+import delma.graph.visualisation.visualGeneration.VisualGenerator;
 import delma.math.Constants;
 import java.awt.Color;
 import java.awt.Font;
@@ -23,12 +24,12 @@ import javax.swing.JPanel;
  */
 public class PanelGraphVisualisation extends JPanel implements ActionListener {
 
-    private final Graph<String> graph;
-    private final GraphVisualGenerator<String> generator;
+    private final Graph graph;
+    private final VisualGenerator generator;
     private Vector focus;
     private double scale = 1;
 
-    public PanelGraphVisualisation(Graph<String> graph, GraphVisualGenerator generator) {
+    public PanelGraphVisualisation(Graph graph, VisualGenerator generator) {
         this.graph = graph;
         this.generator = generator;
         focus = new Vector();
@@ -42,8 +43,8 @@ public class PanelGraphVisualisation extends JPanel implements ActionListener {
         int focusY = (int) (focus.getY() + getHeight() / 2.0);
         g.translate(focusX, focusY);
 
-        for (Iterator<Entry<String, List<Edge<String>>>> it = graph.iterator(); it.hasNext();) {
-            Entry<String, List<Edge<String>>> cur = it.next();
+        for (Iterator<Entry<String, List<Edge>>> it = graph.iterator(); it.hasNext();) {
+            Entry<String, List<Edge>> cur = it.next();
             Vector fromVector = generator.getCoordinates(cur.getKey());
             if (fromVector == null) {
                 continue;
@@ -56,12 +57,19 @@ public class PanelGraphVisualisation extends JPanel implements ActionListener {
             g.drawString(cur.getKey(), fromX, fromY);
             g.setColor(Color.BLACK);
 
-            for (Iterator<Edge<String>> it1 = cur.getValue().iterator(); it1.hasNext();) {
-                Edge<String> vertex = it1.next();
-                if (vertex.getNode().equals(cur.getKey())) {
+            for (Iterator<Edge> it1 = cur.getValue().iterator(); it1.hasNext();) {
+                Edge edge = it1.next();
+                if(edge.getNode() == null){
+                    continue;
+                }
+                if (edge.getNode().equals(cur.getKey())) {
                     //TODO: How to represent self pointing edges
                 } else {
-                    Vector toVector = generator.getCoordinates(vertex.getNode());
+                    Vector toVector = generator.getCoordinates(edge.getNode());
+                    System.out.println(edge.getNode() +  " -> " + toVector);
+                    if (toVector == null) {
+                        continue;
+                    }
                     int toX = (int) (toVector.getX() * scale);
                     int toY = (int) (toVector.getY() * scale);
                     g.drawLine(fromX, fromY, toX, toY);
@@ -70,7 +78,7 @@ public class PanelGraphVisualisation extends JPanel implements ActionListener {
 
                     g.setFont(new Font("Arial", 0, 8 + (int) (4 * scale)));
                     g.setColor(new Color(0, 100, 150));
-                    g.drawString("" + vertex.getWeight(), toX + (fromX - toX) / 2, toY + (fromY - toY) / 2);
+                    g.drawString("" + edge.getWeight(), toX + (fromX - toX) / 2, toY + (fromY - toY) / 2);
                     g.setColor(Color.BLACK);
                 }
             }

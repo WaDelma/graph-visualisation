@@ -1,7 +1,7 @@
 package delma.utils;
 
 import delma.dequelist.ArrayDequeList;
-import delma.graph.visualisation.MultiLevel.Matched;
+import delma.graph.visualisation.visualGeneration.MultiLevel.Matched;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -16,10 +16,10 @@ public final class Utils {
 
     /**
      * Merges any number of collections to one
-     * 
+     *
      * @param <N>
      * @param collections
-     * @return 
+     * @return
      */
     public static <N> Collection<N> merge(Collection<N>... collections) {
         ArrayDequeList<N> result = new ArrayDequeList<>();
@@ -35,6 +35,10 @@ public final class Utils {
             int index = rand.nextInt(i);
             list.set(i - 1, list.set(index, list.get(i - 1)));
         }
+    }
+
+    public static String toString(Object o) {
+        return o == null ? null : o.getClass().getSimpleName() + "@" + Integer.toHexString(o.hashCode());
     }
 
     private Utils() {

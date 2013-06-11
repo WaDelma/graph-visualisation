@@ -2,9 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package delma.graph.visualisation.UI;
+package delma.graph.visualisation.UI.dialog;
 
-import delma.graph.visualisation.GraphVisualGenerator;
+import delma.graph.visualisation.UI.dialog.EditorDialog;
+import delma.graph.visualisation.visualGeneration.GraphVisualGenerator;
+import delma.graph.visualisation.visualGeneration.VisualGenerator;
 import java.awt.GridLayout;
 import javax.swing.JFrame;
 
@@ -14,11 +16,11 @@ import javax.swing.JFrame;
  */
 public class CalculationEditorDialog extends EditorDialog {
 
-    public CalculationEditorDialog(JFrame frame, String title, GraphVisualGenerator visualCalculator) {
+    public CalculationEditorDialog(JFrame frame, String title, VisualGenerator visualCalculator) {
         super(frame, title, false);
         getContentPane().setLayout(new GridLayout(1, 2));
 
-        createInputField("Repulsion optimisation: ", visualCalculator.getRepulsionOptimisation(), visualCalculator.getRepulsionListener());
+        createInputField("Optimisation: ", visualCalculator.getOptimisation(), visualCalculator.getOptimisationListener());
        //createInputField("Edges: ", generator.getEdgeCount(), generator.getEdgeListener());
         //createInputField("Max weight: ", generator.getMaxWeigth(), generator.getWeigthListener());
 
