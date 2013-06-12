@@ -31,6 +31,7 @@ public class UIGraphVisualisation implements ActionListener {
     private final Graph graph;
     private final VisualGenerator visualGenerator;
     private final GraphGenerator graphGenerator;
+    private PanelGraphVisualisation panel;
 
     /**
      * @param graph Graph which is to be drawn to UI
@@ -59,6 +60,7 @@ public class UIGraphVisualisation implements ActionListener {
      */
     @Override
     public void actionPerformed(ActionEvent e) {
+        panel.cache();
         frame.repaint();
     }
 
@@ -68,7 +70,7 @@ public class UIGraphVisualisation implements ActionListener {
         frame.setSize(640, 480);
         frame.setBackground(Color.WHITE);
 
-        PanelGraphVisualisation panel = new PanelGraphVisualisation(graph, visualGenerator);
+        panel = new PanelGraphVisualisation(graph, visualGenerator);
         panel.setSize(640, 480);
 
         PanelMouseListener mouseListener = new PanelMouseListener(panel);
@@ -103,8 +105,8 @@ public class UIGraphVisualisation implements ActionListener {
                 ActionListener listener = new ListenInSequence(visualGenerator.getStepListener(), this);
                 createMenuItem(menu, "Step", "Step in iteration", KeyStroke.getKeyStroke(KeyEvent.VK_S, 0), listener);
 
-                ActionListener a = visualGenerator.getStepListener();
-                listener = new Repeat(new ListenInSequence(a, this), 1, visualGenerator.getStepChecker(), true);
+                
+                listener = new Repeat(listener, 1, visualGenerator.getStepChecker(), true);
                 createMenuItem(menu, "Calculate", "Iterate until equilibrium", KeyStroke.getKeyStroke(KeyEvent.VK_C, 0), listener);
 
                 EditorDialog dialog = new CalculationEditorDialog(frame, "Calculation configuration", visualGenerator);

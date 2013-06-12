@@ -1,5 +1,7 @@
 package delma.map;
 
+import java.util.Iterator;
+import java.util.Map.Entry;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,15 +52,16 @@ public class HashMapTest {
         assertTrue(emptyMap.containsKey('a'));
         assertEquals(2, emptyMap.get('a'));
     }
-
+    
     @Test()
     public void addingManyWorks() {
-        for (int i = 0; i < 1000; i++) {
-            emptyMap.put(i, i * 2);
+        int amount = 100;
+        for (int i = 0; i <= amount; i++) {
+            emptyMap.put(String.valueOf(i), i);
         }
-        for (int i = 0; i < 1000; i++) {
-            assertEquals(i * 2, emptyMap.get(i));
+        for (int i = 0; i <= amount; i++) {
+            assertEquals(i, emptyMap.get(String.valueOf(i)));
         }
-        assertEquals(1000, emptyMap.size());
+        assertEquals(amount + 1, emptyMap.size());
     }
 }

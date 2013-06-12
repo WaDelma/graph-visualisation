@@ -2,6 +2,7 @@ package delma.graph.visualisation.visualGeneration;
 
 import delma.graph.Graph;
 import delma.graph.Graph.Edge;
+import delma.graph.GraphImpl;
 import delma.graph.visualisation.Vector;
 import delma.map.HashMap;
 import delma.tree.QuadTree;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 
 /**
  *
@@ -73,6 +75,24 @@ public class GraphVisualGenerator<N> extends AbstractVisualGenerator<N> {
         stabilised = false;
     }
 
+    public void applyGraph(Graph<N> graph) {
+        this.graph.clear();
+        this.graph.add(graph);
+        
+        int size = this.graph.size() * 5;
+        for (Map.Entry<N, List<Graph.Edge<N>>> temp : this.graph) {
+            if (!positionVectors.containsKey(temp.getKey())) {
+                int tempX = rand.nextInt(size * 2) - size;
+                int tempY = rand.nextInt(size * 2) - size;
+                positionVectors.put(temp.getKey(), new Vector(tempX, tempY));
+                accelerationVectors.put(temp.getKey(), new Vector());
+                speedVectors.put(temp.getKey(), new Vector());
+            }
+        }
+        quadTree = new QuadTree(positionVectors);
+        stabilised = false;
+    }
+
     @Override
     public void calculateStep() {
         if (graph.isEmpty() || stabilised) {
@@ -93,7 +113,7 @@ public class GraphVisualGenerator<N> extends AbstractVisualGenerator<N> {
         for (Map.Entry<N, Vector> node : positionVectors.entrySet()) {
             N nodeKey = node.getKey();
             Vector acceleration = accelerationVectors.get(nodeKey);
-            Collection<Edge<N>> merged = Utils.merge(graph.getNeighbours(nodeKey), graph.getTranspose().getNeighbours(nodeKey));
+            Collection<Edge<N>> merged = Utils.removeDoubles(Utils.merge(graph.getNeighbours(nodeKey), graph.getTranspose().getNeighbours(nodeKey)));
             for (Edge<N> vertex : merged) {
                 Vector localVector = Vector.diff(positionVectors.get(vertex.getNode()), node.getValue());
                 Vector resultingForce = new Vector(localVector);
@@ -131,7 +151,7 @@ public class GraphVisualGenerator<N> extends AbstractVisualGenerator<N> {
             Vector localVector = Vector.diff(vector, node.getMassCenter());
             double repulseX = localVector.getX() == 0 ? 0 : 1 / localVector.getX();
             double repulseY = localVector.getY() == 0 ? 0 : 1 / localVector.getY();
-            acceleration.add(new Vector(repulseX, repulseY));
+            acceleration.add(new Vector(repulseX, repulseY).scale(0.5));
         } else {
             Node[][] temp = node.getSubNodes();
             for (Node[] nodes : temp) {
@@ -220,7 +240,6 @@ public class GraphVisualGenerator<N> extends AbstractVisualGenerator<N> {
      }
      }*/
     //}
-    
     @Override
     public PropertyChangeListener getOptimisationListener() {
         return new PropertyChangeListener() {
@@ -237,19 +256,19 @@ public class GraphVisualGenerator<N> extends AbstractVisualGenerator<N> {
         return tressHold;
     }
 
-    public void inherit(VisualGenerator generator, double d) {
-        if (generator == null) {
+    public Map<N, Vector> getCoordinates() {
+        return new HashMap(positionVectors);
+    }
+
+    public void setCoordinates(Set nodes, Vector coordinates, double i) {
+        if (coordinates == null) {
             return;
         }
-        for (Iterator<Entry<N, Vector>> it = positionVectors.entrySet().iterator(); it.hasNext();) {
-            Entry<N, Vector> entry = it.next();
-            Vector tempVector = generator.getCoordinates(entry.getKey());
-            if (tempVector != null) {
-                //System.out.println("ftw " + entry.getKey() + "="  + tempVector);
-                entry.setValue(tempVector).add(new Vector(rand.nextDouble() * d - d / 2, rand.nextDouble() * d - d / 2));
-            } else {
-                //System.out.println("wtf");
-            }
+        for (Iterator<N> it = nodes.iterator(); it.hasNext();) {
+            double xx = rand.nextDouble() * i - i / 2;
+            double yy = rand.nextDouble() * i - i / 2;
+            Vector coord = new Vector(xx, yy).add(coordinates);
+            positionVectors.put(it.next(), coord);
         }
     }
 }

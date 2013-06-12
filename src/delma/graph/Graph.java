@@ -87,7 +87,19 @@ public interface Graph<N> extends Iterable<Map.Entry<N, List<Graph.Edge<N>>>> {
      */
     public N randomNode();
 
+    /**
+     * Is this graph empty?
+     * 
+     * @return 
+     */
     public boolean isEmpty();
+
+    /**
+     * Adds graph to this graph.
+     * 
+     * @param graph 
+     */
+    public void add(Graph graph);
 
     /**
      * Edge with certain weight.

@@ -1,11 +1,10 @@
 package delma.graph.visualisation;
 
-import delma.graph.visualisation.visualGeneration.VisualGenerator;
-import delma.graph.visualisation.visualGeneration.GraphVisualGenerator;
 import delma.graph.Graph;
 import delma.graph.GraphImpl;
 import delma.graph.visualisation.UI.UIGraphVisualisation;
 import delma.graph.visualisation.visualGeneration.MultiLevelVisualGenerator;
+import delma.graph.visualisation.visualGeneration.VisualGenerator;
 
 /**
  * Main class. Holds strings to all important things.

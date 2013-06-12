@@ -4,6 +4,7 @@ import delma.dequelist.ArrayDequeList;
 import delma.graph.visualisation.visualGeneration.MultiLevel.Matched;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -39,6 +40,17 @@ public final class Utils {
 
     public static String toString(Object o) {
         return o == null ? null : o.getClass().getSimpleName() + "@" + Integer.toHexString(o.hashCode());
+    }
+
+    public static <N> Collection removeDoubles(Collection<N> c) {
+        ArrayDequeList<N> result = new ArrayDequeList<>();
+        for (Iterator<N> it = c.iterator(); it.hasNext();) {
+            N temp = it.next();
+            if(!result.contains(temp)){
+                result.add(temp);
+            }
+        }
+        return result;
     }
 
     private Utils() {

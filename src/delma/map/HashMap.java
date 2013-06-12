@@ -6,6 +6,7 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Random;
 import java.util.Set;
 
 /**
@@ -20,6 +21,7 @@ public class HashMap<K, V> implements Map<K, V> {
     private double load;
     private final static double DEFAULT_LOAD_FACTOR = 0.66;
     private final static int DEFAULT_STARTING_SIZE = 64;
+    private final int hashSeed;
 
     /**
      * Create new one with custom load factor.
@@ -32,6 +34,17 @@ public class HashMap<K, V> implements Map<K, V> {
         }
         load = loadFactor;
         data = new Entry[DEFAULT_STARTING_SIZE];
+        hashSeed = new Random().nextInt();
+    }
+
+    public HashMap(Map<K, V> map) {
+        load = DEFAULT_LOAD_FACTOR;
+        data = new Entry[nextExponentialOfTwo(map.size() + map.size() * load)];
+        hashSeed = new Random().nextInt();
+        for (Iterator<Map.Entry<K, V>> it = map.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<K, V> entry = it.next();
+            internalPut(entry.getKey(), entry.getValue());
+        }
     }
 
     /**
@@ -61,9 +74,6 @@ public class HashMap<K, V> implements Map<K, V> {
     @Override
     public boolean containsValue(Object value) {
         for (Entry entry : data) {
-            if (entry == null) {
-                continue;
-            }
             for (Entry e = entry; e != null; e = e.next) {
                 if (equals(value, e.value)) {
                     return true;
@@ -86,9 +96,14 @@ public class HashMap<K, V> implements Map<K, V> {
 
     @Override
     public V put(K key, V value) {
-        if (size >= load * data.length) {
+        V temp = internalPut(key, value);
+        if (size++ >= load * data.length) {
             ensureCapacity(data.length * 2);
         }
+        return temp;
+    }
+
+    private V internalPut(K key, V value) {
         int hash = getHash(key, data.length);
         for (Entry e = data[hash]; e != null; e = e.next) {
             if (equals(key, e.key)) {
@@ -98,29 +113,24 @@ public class HashMap<K, V> implements Map<K, V> {
             }
         }
         data[hash] = new Entry(key, value, data[hash]);
-        size++;
         return null;
     }
 
     @Override
     public V remove(Object key) {
         int hash = getHash(key, data.length);
-        if (data[hash] == null) {
-            return null;
-        } else {
-            Entry last = null;
-            for (Entry e = data[hash]; e != null; e = e.next) {
-                if (equals(key, e.key)) {
-                    if (last == null) {
-                        data[hash] = e.next;
-                    } else {
-                        last.next = e.next;
-                    }
-                    size--;
-                    return (V) e.value;
+        Entry last = null;
+        for (Entry e = data[hash]; e != null; e = e.next) {
+            if (equals(key, e.key)) {
+                if (last == null) {
+                    data[hash] = e.next;
+                } else {
+                    last.next = e.next;
                 }
-                last = e;
+                size--;
+                return (V) e.value;
             }
+            last = e;
         }
         return null;
     }
@@ -163,13 +173,8 @@ public class HashMap<K, V> implements Map<K, V> {
         Entry[] temp = new Entry[i];
         for (Entry entry : data) {
             for (Entry e = entry; e != null; e = e.next) {
-                int hash = getHash(entry.key, i);
-                if (temp[hash] != null) {
-                    e.next = temp[hash];
-                } else {
-                    e.next = null;
-                }
-                temp[hash] = e;
+                int hash = getHash(e.key, i);
+                temp[hash] = new Entry(e.key, e.value, temp[hash]);
             }
         }
         data = temp;
@@ -177,6 +182,30 @@ public class HashMap<K, V> implements Map<K, V> {
 
     private boolean equals(Object o1, Object o2) {
         return o1 == o2 || (o1 != null && o1.equals(o2));
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("{");
+        for (Iterator<Map.Entry<K, V>> it = entrySet().iterator(); it.hasNext();) {
+            Map.Entry entry = it.next();
+            builder.append("(");
+            builder.append(entry.getKey());
+            //builder.append(", ");
+            //builder.append(entry.getValue());
+            builder.append(")");
+            builder.append(", ");
+        }
+        if (!isEmpty()) {
+            builder.setLength(builder.length() - 2);
+        }
+        builder.append("}");
+        return builder.toString();
+    }
+
+    private int nextExponentialOfTwo(double d) {
+        return (int) Math.pow(2, Math.log(d) / Math.log(2) + 1);
     }
 
     /**
@@ -207,10 +236,8 @@ public class HashMap<K, V> implements Map<K, V> {
             }
             Entry<K, V> result = next;
             cur = next;
-            if (next.next != null) {
-                next = next.next;
-            } else {
-                next = null;
+            next = next.next;
+            if (next == null) {
                 findEntry(index + 1);
             }
             return result;
@@ -229,7 +256,7 @@ public class HashMap<K, V> implements Map<K, V> {
 
         private void checkConcurrentModification() {
             if (size() != expected) {
-                throw new ConcurrentModificationException();
+                throw new ConcurrentModificationException(size() + " != " + expected);
             }
         }
 

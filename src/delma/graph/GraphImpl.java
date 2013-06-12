@@ -55,7 +55,7 @@ public class GraphImpl<N> implements Graph<N> {
 
     @Override
     public void addNode(N node) {
-        if(node == null){
+        if (node == null) {
             return;
         }
         nodes.put(node, new ArrayDequeList<Graph.Edge<N>>());
@@ -101,12 +101,21 @@ public class GraphImpl<N> implements Graph<N> {
     }
 
     private void internalAdd(N from, N to, int weight, Map<N, List<Graph.Edge<N>>> map) {
-        if(from == null || to == null){
+        if (from == null || to == null) {
             return;
         }
         ensure(map, from);
         ensure(map, to);
-        List<Graph.Edge<N>> edgeList = map.get(from);
+        List<Graph.Edge<N>> edgeList = map.get(to);
+        for (Graph.Edge<N> edge : edgeList) {
+            if (edge == null) {
+                continue;
+            }
+            if (to.equals(edge.getNode())) {
+                edge.setWeight(weight);
+            }
+        }
+        edgeList = map.get(from);
         for (Graph.Edge<N> edge : edgeList) {
             if (edge == null) {
                 continue;
@@ -162,7 +171,20 @@ public class GraphImpl<N> implements Graph<N> {
         return size() == 0;
     }
 
+    @Override
+    public void add(Graph graph) {
+        for (Iterator<Map.Entry<N, List<Graph.Edge<N>>>> it = graph.iterator(); it.hasNext();) {
+            Entry<N, List<Graph.Edge<N>>> entry = it.next();
+            nodes.put(entry.getKey(), (List) new ArrayDequeList<>(entry.getValue()));
+        }
+        for (Iterator<Map.Entry<N, List<Graph.Edge<N>>>> it = graph.getTranspose().iterator(); it.hasNext();) {
+            Entry<N, List<Graph.Edge<N>>> entry = it.next();
+            transpose.put(entry.getKey(), (List) new ArrayDequeList<>(entry.getValue()));
+        }
+    }
+
     public static class Edge<N> implements Graph.Edge<N> {
+
         private N node;
         private int weight;
 
@@ -215,6 +237,9 @@ public class GraphImpl<N> implements Graph<N> {
         @Override
         public String toString() {
             String tempNode = Utils.toString(node);
+            if (node instanceof String) {
+                tempNode = "" + node;
+            }
             return "edge:{" + tempNode + "}:" + weight;
         }
     }
@@ -282,6 +307,18 @@ public class GraphImpl<N> implements Graph<N> {
         @Override
         public boolean isEmpty() {
             return GraphImpl.this.isEmpty();
+        }
+
+        @Override
+        public void add(Graph graph) {
+            for (Iterator<Map.Entry<N, List<Graph.Edge<N>>>> it = graph.iterator(); it.hasNext();) {
+                Entry<N, List<Graph.Edge<N>>> entry = it.next();
+                transpose.put(entry.getKey(), (List) new ArrayDequeList<>(entry.getValue()));
+            }
+            for (Iterator<Map.Entry<N, List<Graph.Edge<N>>>> it = graph.getTranspose().iterator(); it.hasNext();) {
+                Entry<N, List<Graph.Edge<N>>> entry = it.next();
+                nodes.put(entry.getKey(), (List) new ArrayDequeList<>(entry.getValue()));
+            }
         }
     }
 }

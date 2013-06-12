@@ -2,8 +2,8 @@ package delma.graph.visualisation.UI;
 
 import delma.graph.Graph;
 import delma.graph.Graph.Edge;
+import delma.graph.GraphImpl;
 import delma.graph.visualisation.Vector;
-import delma.graph.visualisation.visualGeneration.MultiLevel.Matched;
 import delma.graph.visualisation.visualGeneration.VisualGenerator;
 import delma.math.Constants;
 import java.awt.Color;
@@ -28,9 +28,11 @@ public class PanelGraphVisualisation extends JPanel implements ActionListener {
     private final VisualGenerator generator;
     private Vector focus;
     private double scale = 1;
+    private GraphImpl graphCache;
 
     public PanelGraphVisualisation(Graph graph, VisualGenerator generator) {
         this.graph = graph;
+        graphCache = new GraphImpl(this.graph);
         this.generator = generator;
         focus = new Vector();
     }
@@ -43,8 +45,9 @@ public class PanelGraphVisualisation extends JPanel implements ActionListener {
         int focusY = (int) (focus.getY() + getHeight() / 2.0);
         g.translate(focusX, focusY);
 
-        for (Iterator<Entry<String, List<Edge>>> it = graph.iterator(); it.hasNext();) {
-            Entry<String, List<Edge>> cur = it.next();
+        
+        for (Iterator<Entry<Object, List<Edge>>> it = graphCache.iterator(); it.hasNext();) {
+            Entry<Object, List<Edge>> cur = it.next();
             Vector fromVector = generator.getCoordinates(cur.getKey());
             if (fromVector == null) {
                 continue;
@@ -54,7 +57,7 @@ public class PanelGraphVisualisation extends JPanel implements ActionListener {
 
             g.setFont(new Font("Arial", 0, 10 + (int) (4 * scale)));
             g.setColor(new Color(100, 0, 150));
-            g.drawString(cur.getKey(), fromX, fromY);
+            g.drawString("" + cur.getKey(), fromX, fromY);
             g.setColor(Color.BLACK);
 
             for (Iterator<Edge> it1 = cur.getValue().iterator(); it1.hasNext();) {
@@ -66,8 +69,8 @@ public class PanelGraphVisualisation extends JPanel implements ActionListener {
                     //TODO: How to represent self pointing edges
                 } else {
                     Vector toVector = generator.getCoordinates(edge.getNode());
-                    System.out.println(edge.getNode() +  " -> " + toVector);
                     if (toVector == null) {
+                        //System.out.println(edge.getNode() +  " -> " + toVector);
                         continue;
                     }
                     int toX = (int) (toVector.getX() * scale);
@@ -128,5 +131,9 @@ public class PanelGraphVisualisation extends JPanel implements ActionListener {
         int arrowX = (int) (arrowCoord.getX() * scale);
         int arrowY = (int) (arrowCoord.getY() * scale);
         arrow.addPoint(arrowX, arrowY);
+    }
+
+    public void cache() {
+        graphCache = new GraphImpl(this.graph);
     }
 }

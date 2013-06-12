@@ -4,7 +4,6 @@ import delma.dequelist.ArrayDequeList;
 import delma.dequelist.DequeList;
 import delma.graph.Graph;
 import delma.graph.Graph.Edge;
-import delma.graph.GraphImpl;
 import delma.map.HashMap;
 import delma.utils.Utils;
 import java.util.Collection;
@@ -25,7 +24,11 @@ public class MultiLevel<N> {
     private List<Matched<N>> roots;
     private Map<Object, Matched> fromKeyToMatched;
     private List<Matched> matchedGraph;
-    private int coarses;
+    private boolean coarsest;
+
+    public boolean isCoarsest() {
+        return coarsest;
+    }
 
     public List<Matched<N>> getRoots() {
         return roots;
@@ -60,19 +63,19 @@ public class MultiLevel<N> {
         fromKeyToMatched = new HashMap<>();
         matchedGraph = new ArrayDequeList<>();
 
-        coarses = 0;
+        coarsest = false;
 
         //Transform graph to list of matched and create map from key to Matched.
         for (Iterator<Entry<N, List<Edge>>> it = graph.iterator(); it.hasNext();) {
             Entry<N, List<Edge>> entry = it.next();
             //Make it directionless
-            Collection neighbours = Utils.merge(entry.getValue(), graph.getTranspose().getNeighbours(entry.getKey()));
-            Matched tempMatched = new Matched(entry.getKey(), null, new ArrayDequeList<>(neighbours));
+            Collection neighbours = Utils.removeDoubles(Utils.merge(entry.getValue(), graph.getTranspose().getNeighbours(entry.getKey())));
+            Matched tempMatched = new Matched(entry.getKey(), null, new ArrayDequeList<>(neighbours), 0);
             fromKeyToMatched.put(entry.getKey(), tempMatched);
             matchedGraph.add(tempMatched);
         }
 
-        matchedGraph = replaceEdgesWithRepresentatives(matchedGraph, fromKeyToMatched);
+        replaceEdgesWithRepresentatives(matchedGraph, fromKeyToMatched);
 
         List<DequeList<Matched>> graphs = findSubGraphs(matchedGraph);
         for (Iterator<DequeList<Matched>> it = graphs.iterator(); it.hasNext();) {
@@ -111,23 +114,6 @@ public class MultiLevel<N> {
         return result;
     }
 
-    private boolean isConnectedGraph(List<Matched> graph) {
-        DequeList<Matched> nodesRemaining = new ArrayDequeList<>(graph);
-        DequeList<Matched> stack = new ArrayDequeList();
-        stack.push(nodesRemaining.peek());
-        while (!stack.isEmpty()) {
-            Matched cur = stack.pop();
-            if (!nodesRemaining.contains(cur)) {
-                continue;
-            }
-            nodesRemaining.remove(cur);
-            for (Iterator<Edge<Matched>> it = cur.getNeighbours().iterator(); it.hasNext();) {
-                stack.push(it.next().getNode());
-            }
-        }
-        return nodesRemaining.isEmpty();
-    }
-
     /**
      * Coarses graph until it's in its coarsest form.
      *
@@ -138,8 +124,7 @@ public class MultiLevel<N> {
             matched.clear();
             fromKeyToMatched.clear();
             matchWholeGraph(graph);
-            matched = replaceEdgesWithRepresentatives(matched, fromKeyToMatched);
-            coarses++;
+            replaceEdgesWithRepresentatives(matched, fromKeyToMatched);
             if (matched.size() == 1) {
                 break;
             }
@@ -170,7 +155,7 @@ public class MultiLevel<N> {
                 graph.remove(node2);
             }
 
-            Matched matched1 = new Matched(node1, node2, neighbours);
+            Matched matched1 = new Matched(node1, node2, neighbours, node1.getLevel() + 1);
             node1.parent = matched1;
             fromKeyToMatched.put(node1, matched1);
             if (node1 != node2) {
@@ -197,43 +182,46 @@ public class MultiLevel<N> {
     /**
      * Replace edges of pairs with edges to pairs.
      */
-    private List<Matched> replaceEdgesWithRepresentatives(List<Matched> matched, Map<Object, Matched> map) {
-        List<Matched> result = new ArrayDequeList<>();
+    private void replaceEdgesWithRepresentatives(List<Matched> matched, Map<Object, Matched> map) {
         for (Iterator<Matched> it = matched.iterator(); it.hasNext();) {
             Matched matched1 = it.next();
-            List<Edge> tempNeighbours = new ArrayDequeList<>();
             for (Iterator<Edge> it1 = matched1.getNeighbours().iterator(); it1.hasNext();) {
                 Edge edge = it1.next();
                 Matched tempMatched = map.get(edge.getNode());
                 //Remove self pointing edges
                 if (matched1.equals(tempMatched)) {
+                    it1.remove();
                     continue;
                 }
-                tempNeighbours.add(new GraphImpl.Edge(tempMatched, edge.getWeight()));
-                //edge.setNode(tempMatched);
+                if (tempMatched == null) {
+                    continue;
+                }
+                edge.setNode(tempMatched);
             }
-            result.add(new Matched(matched1.n0, matched1.n1, tempNeighbours));
         }
-        return result;
     }
 
     public void uncoarse() {
-        if (coarses == 0) {
-            return;
-        }
-        coarses--;
         ArrayDequeList temp = new ArrayDequeList();
         for (int i = 0; i < roots.size(); i++) {
             if (roots.get(i) == null) {
                 continue;
             }
-            temp.add(roots.get(i).getN1());
+            if (roots.get(i).getN1() == null) {
+                continue;
+            }
+            if (!temp.contains(roots.get(i).getN0())) {
+                temp.add(roots.get(i).getN0());
+            }
+            if (!temp.contains(roots.get(i).getN1())) {
+                temp.add(roots.get(i).getN1());
+            }
+        }
+        if (temp.isEmpty()) {
+            coarsest = true;
+            return;
         }
         roots = temp;
-    }
-
-    public int coarses() {
-        return coarses;
     }
 
     public static class Matched<N> {
@@ -241,11 +229,17 @@ public class MultiLevel<N> {
         private Matched<N> parent;
         private N n0, n1;
         private List<Edge<N>> neighbours;
+        private final int level;
 
-        private Matched(N n0, N n1, List<Edge<N>> neighbours) {
+        private Matched(N n0, N n1, List<Edge<N>> neighbours, int level) {
             this.n0 = n0;
             this.n1 = n1;
             this.neighbours = neighbours;
+            this.level = level;
+        }
+
+        public int getLevel() {
+            return level;
         }
 
         public N getN0() {
@@ -274,23 +268,30 @@ public class MultiLevel<N> {
                 return false;
             }
             final Matched<N> other = (Matched<N>) obj;
-            if (!Objects.equals(this.n0, other.n0)) {
+            if (this.n0 != other.n0) {//!Objects.equals(this.n0, other.n0)) {
                 return false;
             }
-            if (!Objects.equals(this.n1, other.n1)) {
+            if (this.n1 != other.n1) { //!Objects.equals(this.n1, other.n1)) {
                 return false;
             }
-            return true;
+            return this.level == other.level;
         }
 
         @Override
         public String toString() {
-            String string = Utils.toString(n0);
-            if (n1 != null) {
-                string += "|" + Utils.toString(n1);
+//            String string = Utils.toString(n0);
+//            if (n0 instanceof String) {
+//                string = "" + n0;
+//            }
+//            if (n1 != null) {
+//                string += "|" + Utils.toString(n1);
+//            }
+//            String temp = neighbours == null ? null : neighbours.toString();
+//            return "[" + string + "]" + level;// + "=" + temp;
+            if (n1 == null) {
+                return "" + n0;
             }
-            String temp = neighbours == null ? null : neighbours.toString();
-            return "[" + string + "]=" + temp;
+            return "[" + level + "]";
         }
 
         public List<Edge<N>> getNeighbours() {
