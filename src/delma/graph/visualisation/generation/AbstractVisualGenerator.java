@@ -2,10 +2,10 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package delma.graph.visualisation.visualGeneration;
+package delma.graph.visualisation.generation;
 
 import delma.graph.visualisation.UI.UIGraphVisualisation.Requirement;
-import delma.graph.visualisation.visualGeneration.VisualGenerator;
+import delma.graph.visualisation.generation.VisualGenerator;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;

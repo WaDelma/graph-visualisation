@@ -1,9 +1,9 @@
 
 import delma.graph.Graph;
 import delma.graph.GraphImpl;
-import delma.graph.visualisation.GraphGenerator;
-import delma.graph.visualisation.visualGeneration.MultiLevel;
-import delma.graph.visualisation.visualGeneration.MultiLevel.Matched;
+import delma.graph.GraphGenerator;
+import delma.graph.visualisation.generation.MultiLevel;
+import delma.graph.visualisation.generation.MultiLevel.Matched;
 import delma.utils.Utils;
 import java.util.Iterator;
 

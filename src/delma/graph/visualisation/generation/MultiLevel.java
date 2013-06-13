@@ -1,4 +1,4 @@
-package delma.graph.visualisation.visualGeneration;
+package delma.graph.visualisation.generation;
 
 import delma.dequelist.ArrayDequeList;
 import delma.dequelist.DequeList;

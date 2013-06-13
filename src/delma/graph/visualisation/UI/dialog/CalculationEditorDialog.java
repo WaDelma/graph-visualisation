@@ -5,8 +5,8 @@
 package delma.graph.visualisation.UI.dialog;
 
 import delma.graph.visualisation.UI.dialog.EditorDialog;
-import delma.graph.visualisation.visualGeneration.GraphVisualGenerator;
-import delma.graph.visualisation.visualGeneration.VisualGenerator;
+import delma.graph.visualisation.generation.GraphVisualGenerator;
+import delma.graph.visualisation.generation.VisualGenerator;
 import java.awt.GridLayout;
 import javax.swing.JFrame;
 

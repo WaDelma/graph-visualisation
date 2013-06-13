@@ -1,4 +1,4 @@
-package delma.graph.visualisation.visualGeneration;
+package delma.graph.visualisation.generation;
 
 import delma.graph.visualisation.UI.UIGraphVisualisation;
 import delma.graph.visualisation.UI.UIGraphVisualisation.Requirement;
@@ -41,6 +41,8 @@ public interface VisualGenerator<N> {
      * @return
      */
     public boolean isReady();
+    
+    public String getName();
 
     public ActionListener getInitialisationListener();
 

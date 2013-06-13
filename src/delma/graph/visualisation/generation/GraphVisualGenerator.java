@@ -1,4 +1,4 @@
-package delma.graph.visualisation.visualGeneration;
+package delma.graph.visualisation.generation;
 
 import delma.graph.Graph;
 import delma.graph.Graph.Edge;
@@ -118,7 +118,7 @@ public class GraphVisualGenerator<N> extends AbstractVisualGenerator<N> {
                 Vector localVector = Vector.diff(positionVectors.get(vertex.getNode()), node.getValue());
                 Vector resultingForce = new Vector(localVector);
                 resultingForce.normalize();
-                resultingForce.scale(Math.log(graph.size()) * vertex.getWeight() - Vector.distance(localVector));
+                resultingForce.scale(Math.log(graph.size()) * 10 * Math.log(vertex.getWeight()) - Vector.distance(localVector));
                 resultingForce.scale(-0.4);
                 acceleration.add(resultingForce);
             }
@@ -270,5 +270,10 @@ public class GraphVisualGenerator<N> extends AbstractVisualGenerator<N> {
             Vector coord = new Vector(xx, yy).add(coordinates);
             positionVectors.put(it.next(), coord);
         }
+    }
+
+    @Override
+    public String getName() {
+        return "Force-directed Graph Drawing";
     }
 }

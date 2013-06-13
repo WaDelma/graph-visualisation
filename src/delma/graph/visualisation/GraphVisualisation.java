@@ -1,10 +1,11 @@
 package delma.graph.visualisation;
 
 import delma.graph.Graph;
+import delma.graph.GraphGenerator;
 import delma.graph.GraphImpl;
 import delma.graph.visualisation.UI.UIGraphVisualisation;
-import delma.graph.visualisation.visualGeneration.MultiLevelVisualGenerator;
-import delma.graph.visualisation.visualGeneration.VisualGenerator;
+import delma.graph.visualisation.generation.GraphVisualGenerator;
+import delma.graph.visualisation.generation.VisualGenerator;
 
 /**
  * Main class. Holds strings to all important things.
@@ -28,7 +29,7 @@ public class GraphVisualisation {
 
     public GraphVisualisation() {
         graph = new GraphImpl<>();
-        visualCalculator = new MultiLevelVisualGenerator(graph);
+        visualCalculator = new GraphVisualGenerator(graph);
         graphGenerator = new GraphGenerator(graph);
         UI = new UIGraphVisualisation(graph, visualCalculator, graphGenerator);
         UI.create();

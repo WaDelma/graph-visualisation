@@ -1,4 +1,4 @@
-package delma.graph.visualisation.visualGeneration;
+package delma.graph.visualisation.generation;
 
 import delma.dequelist.ArrayDequeList;
 import delma.dequelist.DequeList;
@@ -6,7 +6,7 @@ import delma.graph.Graph;
 import delma.graph.Graph.Edge;
 import delma.graph.GraphImpl;
 import delma.graph.visualisation.Vector;
-import delma.graph.visualisation.visualGeneration.MultiLevel.Matched;
+import delma.graph.visualisation.generation.MultiLevel.Matched;
 import delma.map.HashMap;
 import java.beans.PropertyChangeListener;
 import java.util.Arrays;
@@ -139,5 +139,10 @@ public class MultiLevelVisualGenerator<N> extends AbstractVisualGenerator<N> {
     @Override
     public double getOptimisation() {
         return generator.getOptimisation();
+    }
+
+    @Override
+    public String getName() {
+        return "Multilevel Algorithm for Force-Directed Graph Drawing";
     }
 }

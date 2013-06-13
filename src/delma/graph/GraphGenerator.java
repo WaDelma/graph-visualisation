@@ -1,4 +1,4 @@
-package delma.graph.visualisation;
+package delma.graph;
 
 import delma.graph.Graph;
 import java.awt.event.ActionEvent;

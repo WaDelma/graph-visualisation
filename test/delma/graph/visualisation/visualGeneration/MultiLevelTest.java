@@ -4,10 +4,11 @@
  */
 package delma.graph.visualisation.visualGeneration;
 
+import delma.graph.visualisation.generation.MultiLevel;
 import delma.graph.Graph;
 import delma.graph.Graph.Edge;
 import delma.graph.GraphImpl;
-import delma.graph.visualisation.visualGeneration.MultiLevel.Matched;
+import delma.graph.visualisation.generation.MultiLevel.Matched;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;

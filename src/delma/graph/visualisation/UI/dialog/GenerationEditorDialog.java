@@ -1,7 +1,7 @@
 package delma.graph.visualisation.UI.dialog;
 
 import delma.graph.visualisation.UI.dialog.EditorDialog;
-import delma.graph.visualisation.GraphGenerator;
+import delma.graph.GraphGenerator;
 import java.awt.Frame;
 import java.awt.GridLayout;
 

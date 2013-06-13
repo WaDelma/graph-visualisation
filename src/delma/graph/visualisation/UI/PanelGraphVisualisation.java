@@ -4,7 +4,7 @@ import delma.graph.Graph;
 import delma.graph.Graph.Edge;
 import delma.graph.GraphImpl;
 import delma.graph.visualisation.Vector;
-import delma.graph.visualisation.visualGeneration.VisualGenerator;
+import delma.graph.visualisation.generation.VisualGenerator;
 import delma.math.Constants;
 import java.awt.Color;
 import java.awt.Font;

@@ -1,14 +1,12 @@
 package delma.graph.visualisation.UI;
 
-import delma.graph.visualisation.UI.dialog.GenerationEditorDialog;
-import delma.graph.visualisation.UI.dialog.EditorDialog;
 import delma.graph.Graph;
-import delma.graph.visualisation.GraphGenerator;
+import delma.graph.GraphGenerator;
 import delma.graph.visualisation.UI.dialog.CalculationEditorDialog;
-import delma.graph.visualisation.visualGeneration.GraphVisualGenerator;
-import delma.graph.visualisation.visualGeneration.VisualGenerator;
+import delma.graph.visualisation.UI.dialog.EditorDialog;
+import delma.graph.visualisation.UI.dialog.GenerationEditorDialog;
+import delma.graph.visualisation.generation.VisualGenerator;
 import java.awt.Color;
-import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;

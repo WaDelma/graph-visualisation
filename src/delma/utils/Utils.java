@@ -1,7 +1,7 @@
 package delma.utils;
 
 import delma.dequelist.ArrayDequeList;
-import delma.graph.visualisation.visualGeneration.MultiLevel.Matched;
+import delma.graph.visualisation.generation.MultiLevel.Matched;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
