@@ -7,7 +7,7 @@ import java.util.Map.Entry;
 
 /**
  * Quad tree for Barnes–Hut simulation
- * 
+ *
  * @author aopkarja
  */
 public class QuadTree<N> {
@@ -42,14 +42,13 @@ public class QuadTree<N> {
     public QuadTree(Map<N, Vector> bodies) {
         this(bodies, DEFAULT_GRADUALITY);
     }
-    
+
     /**
      * Creates and populates new QuadTree using vectors. Masses are set to 1.
-     * 
+     *
      * @param bodies
      * @param graduality How close Vectors are considered equals
      */
-
     public QuadTree(Map<N, Vector> bodies, double graduality) {
         this();
         this.graduality = graduality;
@@ -109,29 +108,30 @@ public class QuadTree<N> {
                     this.n = n;
                     return true;
                 } else {
-                    Vector temp = new Vector(center).scale(1 / this.mass);
+                    Vector temp = getMassCenter();
                     if (Vector.equals(temp, vector, graduality)) {
                         return false;
                     }
-                    int quadrantX = temp.getX() < getDivisionX() ? 0 : 1;
-                    int quadrantY = temp.getY() < getDivisionY() ? 0 : 1;
-                    subNodes[quadrantX][quadrantY] = new Node(calcMin(quadrantX, quadrantY), calcMax(quadrantX, quadrantY));
-                    subNodes[quadrantX][quadrantY].addBody(this.n, temp, this.mass);
+                    add(this.n, temp, this.mass);
                     external = false;
                     this.n = null;
                 }
             }
-            int quadrantX = vector.getX() < getDivisionX() ? 0 : 1;
-            int quadrantY = vector.getY() < getDivisionY() ? 0 : 1;
-            if (subNodes[quadrantX][quadrantY] == null) {
-                subNodes[quadrantX][quadrantY] = new Node(calcMin(quadrantX, quadrantY), calcMax(quadrantX, quadrantY));
-            }
-            if (subNodes[quadrantX][quadrantY].addBody(n, vector, mass)) {
+            if (add(n, vector, mass)) {
                 center.add(new Vector(vector).scale(mass));
                 this.mass += mass;
                 return true;
             }
             return false;
+        }
+        
+        private boolean add(N n, Vector vector, double mass) {
+            int quadrantX = vector.getX() < getDivisionX() ? 0 : 1;
+            int quadrantY = vector.getY() < getDivisionY() ? 0 : 1;
+            if (subNodes[quadrantX][quadrantY] == null) {
+                subNodes[quadrantX][quadrantY] = new Node(calcMin(quadrantX, quadrantY), calcMax(quadrantX, quadrantY));
+            }
+            return subNodes[quadrantX][quadrantY].addBody(n, vector, mass);
         }
 
         private Vector calcMin(int quadrantX, int quadrantY) {
@@ -159,7 +159,7 @@ public class QuadTree<N> {
         }
 
         public Vector getMassCenter() {
-            return new Vector(center).scale(1 / mass);
+            return center == null ? null : new Vector(center).scale(1 / mass);
         }
 
         public double getWidth() {
@@ -183,10 +183,10 @@ public class QuadTree<N> {
         }
 
         private boolean isInsideArea(Vector vector) {
-            if(min.getX() <= vector.getX() && vector.getX() <= max.getX()){
+            if (min.getX() <= vector.getX() && vector.getX() <= max.getX()) {
                 return true;
             }
-            if(min.getY() <= vector.getY() && vector.getY() <= max.getY()){
+            if (min.getY() <= vector.getY() && vector.getY() <= max.getY()) {
                 return true;
             }
             return false;

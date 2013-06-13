@@ -1,11 +1,14 @@
 package delma.graph.visualisation;
 
+import delma.math.Constants;
+import java.util.Random;
+
 /**
  *
  * @author Antti
  */
 public class Vector {
-
+   
     /**
      *
      * @param vector1
@@ -55,6 +58,21 @@ public class Vector {
 
     public static boolean equals(Vector vector1, Vector vector2, double delta) {
         return distance(vector1, vector2) < delta;
+    }
+
+    
+    private static Random rand;
+    
+    /**
+     * Creates vector with distance and random direction
+     *
+     * @param distance
+     */
+    public static Vector getVectorRandomDir(double distance) {
+        if(rand == null){
+            rand = new Random();
+        }
+        return new Vector(distance, 0).rotate(rand.nextDouble() * Constants.TAU);
     }
     
     private double x, y;

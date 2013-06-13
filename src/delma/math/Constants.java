@@ -5,7 +5,7 @@ package delma.math;
  * 
  * @author aopkarja
  */
-public final class Constants {
+public class Constants {
 
     /**
      * Tau represents turning a whole circle.

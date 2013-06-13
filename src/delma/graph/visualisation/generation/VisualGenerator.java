@@ -1,6 +1,5 @@
 package delma.graph.visualisation.generation;
 
-import delma.graph.visualisation.UI.UIGraphVisualisation;
 import delma.graph.visualisation.UI.UIGraphVisualisation.Requirement;
 import delma.graph.visualisation.Vector;
 import java.awt.event.ActionListener;

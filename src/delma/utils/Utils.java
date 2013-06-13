@@ -1,11 +1,14 @@
 package delma.utils;
 
 import delma.dequelist.ArrayDequeList;
-import delma.graph.visualisation.generation.MultiLevel.Matched;
+import delma.graph.Graph;
+import delma.graph.Graph.Edge;
+import delma.graph.GraphImpl;
+import delma.map.HashMap;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Random;
 
 /**
@@ -13,7 +16,7 @@ import java.util.Random;
  *
  * @author aopkarja
  */
-public final class Utils {
+public class Utils {
 
     /**
      * Merges any number of collections to one
@@ -43,14 +46,28 @@ public final class Utils {
     }
 
     public static <N> Collection removeDoubles(Collection<N> c) {
-        ArrayDequeList<N> result = new ArrayDequeList<>();
+        List<N> result = new ArrayDequeList<>();
         for (Iterator<N> it = c.iterator(); it.hasNext();) {
             N temp = it.next();
-            if(!result.contains(temp)){
+            if (!result.contains(temp)) {
                 result.add(temp);
             }
         }
         return result;
+    }
+
+    public static <N> List<Edge<N>> getDirectionLessNeighbours(N n, Graph<N> graph) {
+        HashMap<Object, Edge> neighbours = new HashMap();
+        for (Iterator<Edge<N>> it1 = graph.getNeighbours(n).iterator(); it1.hasNext();) {
+            Edge edge = it1.next();
+            neighbours.put(edge.getNode(), edge);
+        }
+        for (Iterator<Edge<N>> it1 = graph.getTranspose().getNeighbours(n).iterator(); it1.hasNext();) {
+            Edge edge = it1.next();
+            neighbours.put(edge.getNode(), edge);
+        }
+        neighbours.remove(n);
+        return (List) new ArrayDequeList<>(neighbours.values());
     }
 
     private Utils() {

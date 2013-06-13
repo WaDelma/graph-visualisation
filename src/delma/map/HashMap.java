@@ -97,7 +97,7 @@ public class HashMap<K, V> implements Map<K, V> {
     @Override
     public V put(K key, V value) {
         V temp = internalPut(key, value);
-        if (size++ >= load * data.length) {
+        if (size >= load * data.length) {
             ensureCapacity(data.length * 2);
         }
         return temp;
@@ -112,6 +112,7 @@ public class HashMap<K, V> implements Map<K, V> {
                 return temp;
             }
         }
+        size++;
         data[hash] = new Entry(key, value, data[hash]);
         return null;
     }

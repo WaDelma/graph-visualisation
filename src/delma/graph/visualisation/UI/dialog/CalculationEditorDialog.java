@@ -5,7 +5,6 @@
 package delma.graph.visualisation.UI.dialog;
 
 import delma.graph.visualisation.UI.dialog.EditorDialog;
-import delma.graph.visualisation.generation.GraphVisualGenerator;
 import delma.graph.visualisation.generation.VisualGenerator;
 import java.awt.GridLayout;
 import javax.swing.JFrame;
@@ -16,15 +15,13 @@ import javax.swing.JFrame;
  */
 public class CalculationEditorDialog extends EditorDialog {
 
-    public CalculationEditorDialog(JFrame frame, String title, VisualGenerator visualCalculator) {
+    public CalculationEditorDialog(JFrame frame, String title, VisualGenerator visualGenerator) {
         super(frame, title, false);
         getContentPane().setLayout(new GridLayout(1, 2));
 
-        createInputField("Optimisation: ", visualCalculator.getOptimisation(), visualCalculator.getOptimisationListener());
-       //createInputField("Edges: ", generator.getEdgeCount(), generator.getEdgeListener());
-        //createInputField("Max weight: ", generator.getMaxWeigth(), generator.getWeigthListener());
+        createInputField("Optimisation: ", visualGenerator.getOptimisation(), visualGenerator.getOptimisationListener());
 
-        setSize(300, 50);
+        pack();
     }
     
 }

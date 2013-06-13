@@ -9,9 +9,7 @@ import delma.graph.Graph;
 import delma.graph.Graph.Edge;
 import delma.graph.GraphImpl;
 import delma.graph.visualisation.generation.MultiLevel.Matched;
-import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -81,7 +79,7 @@ public class MultiLevelTest {
     private void testCoarsingAndUncoarsing(Graph graph, boolean undirected) {
         MultiLevel multiLevel = new MultiLevel(graph);
         multiLevel.process();
-        while (!multiLevel.isCoarsest()) {
+        while (!multiLevel.isUncoarsest()) {
             multiLevel.uncoarse();
         }
         assertEquals(graph.size(), multiLevel.getRoots().size());

@@ -1,7 +1,6 @@
 package delma.dequelist;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import static org.junit.Assert.*;

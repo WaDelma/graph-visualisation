@@ -100,6 +100,14 @@ public interface Graph<N> extends Iterable<Map.Entry<N, List<Graph.Edge<N>>>> {
      * @param graph 
      */
     public void add(Graph graph);
+    
+    /**
+     * Is this node in graph?
+     * 
+     * @param n
+     * @return 
+     */
+    public boolean contains(N n);
 
     /**
      * Edge with certain weight.

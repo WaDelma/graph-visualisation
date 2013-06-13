@@ -4,9 +4,12 @@ import delma.dequelist.ArrayDequeList;
 import delma.dequelist.DequeList;
 import delma.graph.Graph;
 import delma.graph.Graph.Edge;
+import delma.graph.GraphImpl;
 import delma.map.HashMap;
 import delma.utils.Utils;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -24,14 +27,15 @@ public class MultiLevel<N> {
     private List<Matched<N>> roots;
     private Map<Object, Matched> fromKeyToMatched;
     private List<Matched> matchedGraph;
-    private boolean coarsest;
+    private boolean uncoarsest;
+    private static final Object DUMMY = new Object();
 
-    public boolean isCoarsest() {
-        return coarsest;
+    public boolean isUncoarsest() {
+        return uncoarsest;
     }
 
     public List<Matched<N>> getRoots() {
-        return roots;
+        return Collections.unmodifiableList(roots);
     }
 
     public Matched getMatched(N n) {
@@ -63,15 +67,13 @@ public class MultiLevel<N> {
         fromKeyToMatched = new HashMap<>();
         matchedGraph = new ArrayDequeList<>();
 
-        coarsest = false;
+        uncoarsest = false;
 
         //Transform graph to list of matched and create map from key to Matched.
-        for (Iterator<Entry<N, List<Edge>>> it = graph.iterator(); it.hasNext();) {
-            Entry<N, List<Edge>> entry = it.next();
-            //Make it directionless
-            Collection neighbours = Utils.removeDoubles(Utils.merge(entry.getValue(), graph.getTranspose().getNeighbours(entry.getKey())));
-            Matched tempMatched = new Matched(entry.getKey(), null, new ArrayDequeList<>(neighbours), 0);
-            fromKeyToMatched.put(entry.getKey(), tempMatched);
+        for (Iterator<N> it = graph.getNodes().iterator(); it.hasNext();) {
+            N n = it.next();
+            Matched tempMatched = new Matched(n, null, Utils.getDirectionLessNeighbours(n, graph), 0);
+            fromKeyToMatched.put(n, tempMatched);
             matchedGraph.add(tempMatched);
         }
 
@@ -128,6 +130,7 @@ public class MultiLevel<N> {
             if (matched.size() == 1) {
                 break;
             }
+            graph.clear();
             graph.addAll(matched);
             Utils.suffle(graph);
         }
@@ -153,6 +156,13 @@ public class MultiLevel<N> {
                     }
                 }
                 graph.remove(node2);
+            }
+
+            for (Iterator<Edge<Matched>> it = neighbours.iterator(); it.hasNext();) {
+                Edge<Matched> edge = it.next();
+                if (edge.getNode().equals(node1) || edge.getNode().equals(node2)) {
+                    it.remove();
+                }
             }
 
             Matched matched1 = new Matched(node1, node2, neighbours, node1.getLevel() + 1);
@@ -189,10 +199,10 @@ public class MultiLevel<N> {
                 Edge edge = it1.next();
                 Matched tempMatched = map.get(edge.getNode());
                 //Remove self pointing edges
-                if (matched1.equals(tempMatched)) {
+                /*if (matched1.equals(tempMatched)) {
                     it1.remove();
                     continue;
-                }
+                }*/
                 if (tempMatched == null) {
                     continue;
                 }
@@ -202,12 +212,18 @@ public class MultiLevel<N> {
     }
 
     public void uncoarse() {
+        if(uncoarsest){
+            return;
+        }
         ArrayDequeList temp = new ArrayDequeList();
+        int lowest = 0;
         for (int i = 0; i < roots.size(); i++) {
             if (roots.get(i) == null) {
                 continue;
             }
             if (roots.get(i).getN1() == null) {
+                lowest++;
+                temp.add(roots.get(i));
                 continue;
             }
             if (!temp.contains(roots.get(i).getN0())) {
@@ -217,8 +233,8 @@ public class MultiLevel<N> {
                 temp.add(roots.get(i).getN1());
             }
         }
-        if (temp.isEmpty()) {
-            coarsest = true;
+        if (temp.size() == lowest) {
+            uncoarsest = true;
             return;
         }
         roots = temp;
@@ -279,23 +295,23 @@ public class MultiLevel<N> {
 
         @Override
         public String toString() {
-//            String string = Utils.toString(n0);
-//            if (n0 instanceof String) {
-//                string = "" + n0;
-//            }
-//            if (n1 != null) {
-//                string += "|" + Utils.toString(n1);
-//            }
-//            String temp = neighbours == null ? null : neighbours.toString();
-//            return "[" + string + "]" + level;// + "=" + temp;
-            if (n1 == null) {
-                return "" + n0;
+            String string = Utils.toString(n0);
+            if (n0 instanceof String) {
+                string = "" + n0;
             }
-            return "[" + level + "]";
+            if (n1 != null) {
+                string += "|" + Utils.toString(n1);
+            }
+            String temp = neighbours == null ? null : neighbours.toString();
+            return "[" + string + "]" + level;// + "=" + temp;
+//            if (n1 == null) {
+//                return "" + n0;
+//            }
+//            return "[" + level + "]";
         }
 
         public List<Edge<N>> getNeighbours() {
-            return neighbours;
+            return Collections.unmodifiableList(neighbours);
         }
     }
 }

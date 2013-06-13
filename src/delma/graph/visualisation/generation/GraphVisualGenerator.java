@@ -1,8 +1,9 @@
 package delma.graph.visualisation.generation;
 
+import delma.dequelist.ArrayDequeList;
+import delma.dequelist.DequeList;
 import delma.graph.Graph;
 import delma.graph.Graph.Edge;
-import delma.graph.GraphImpl;
 import delma.graph.visualisation.Vector;
 import delma.map.HashMap;
 import delma.tree.QuadTree;
@@ -33,9 +34,20 @@ public class GraphVisualGenerator<N> extends AbstractVisualGenerator<N> {
     private int steps;
     private QuadTree quadTree;
     private double tressHold = 0.4;
+    private double temperature;
+    private int level;
 
     public GraphVisualGenerator(Graph<N> graph) {
-        positionVectors = new HashMap<>();
+        this(graph, new HashMap<N, Vector>());
+        /*positionVectors = new HashMap<>();
+        accelerationVectors = new HashMap<>();
+        speedVectors = new HashMap<>();
+        this.graph = graph;
+        rand = new Random();*/
+    }
+
+    public GraphVisualGenerator(Graph<N> graph, Map<N, Vector> position) {
+        positionVectors = position;
         accelerationVectors = new HashMap<>();
         speedVectors = new HashMap<>();
         this.graph = graph;
@@ -58,38 +70,26 @@ public class GraphVisualGenerator<N> extends AbstractVisualGenerator<N> {
             return;
         }
         steps = 0;
+        level = graph.size();
+        temperature = level;
 
         positionVectors.clear();
         accelerationVectors.clear();
         speedVectors.clear();
 
-        int size = graph.size() * 5;
         for (Map.Entry<N, List<Graph.Edge<N>>> temp : graph) {
-            int tempX = rand.nextInt(size * 2) - size;
-            int tempY = rand.nextInt(size * 2) - size;
-            positionVectors.put(temp.getKey(), new Vector(tempX, tempY));
+            positionVectors.put(temp.getKey(), Vector.getVectorRandomDir(rand.nextInt(5 * graph.size())));//new Vector(tempX, tempY));
             accelerationVectors.put(temp.getKey(), new Vector());
             speedVectors.put(temp.getKey(), new Vector());
         }
-        quadTree = new QuadTree(positionVectors);
+        //quadTree = new QuadTree(positionVectors);
         stabilised = false;
     }
 
-    public void applyGraph(Graph<N> graph) {
-        this.graph.clear();
-        this.graph.add(graph);
-        
-        int size = this.graph.size() * 5;
-        for (Map.Entry<N, List<Graph.Edge<N>>> temp : this.graph) {
-            if (!positionVectors.containsKey(temp.getKey())) {
-                int tempX = rand.nextInt(size * 2) - size;
-                int tempY = rand.nextInt(size * 2) - size;
-                positionVectors.put(temp.getKey(), new Vector(tempX, tempY));
-                accelerationVectors.put(temp.getKey(), new Vector());
-                speedVectors.put(temp.getKey(), new Vector());
-            }
-        }
-        quadTree = new QuadTree(positionVectors);
+    public void update(int level){
+        steps = 0;
+        this.level = level;
+        temperature = level;
         stabilised = false;
     }
 
@@ -98,14 +98,77 @@ public class GraphVisualGenerator<N> extends AbstractVisualGenerator<N> {
         if (graph.isEmpty() || stabilised) {
             return;
         }
-        applySprings();
-        applyRepulsion();
-        applyFriction();
+        quadTree = new QuadTree(getPositionsInGraph(graph, positionVectors));
+        boolean flag = true;
+        for (Iterator<Entry<N, Vector>> it = positionVectors.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<N, Vector> node = it.next();
+            Vector displacement = new Vector();
+
+            DequeList<Node> stack = new ArrayDequeList();
+            stack.push(quadTree.getRoot());
+            while (!stack.isEmpty()) {
+                Node curNode = stack.pop();
+                if (curNode == null) {
+                    continue;
+                }
+                Vector localVector = Vector.diff(curNode.getMassCenter(), node.getValue());
+                double dist = Vector.distance(localVector);
+                if (curNode.isExternal() || curNode.getWidth() / dist < tressHold) {
+                    if (dist == 0) {
+                        node.getValue().add(Vector.getVectorRandomDir(1));
+                        localVector = Vector.diff(curNode.getMassCenter(), node.getValue());
+                        dist = Vector.distance(localVector);
+                    }
+                    localVector.scale(1 / dist);
+                    localVector.scale(-0.2 * 1 * level * level / dist);
+                    displacement.add(localVector);
+                } else {
+                    Node[][] temp = curNode.getSubNodes();
+                    for (Node[] nodes : temp) {
+                        for (Node node1 : nodes) {
+                            stack.push(node1);
+                        }
+                    }
+                }
+            }
+
+            for (Iterator<Edge<N>> it2 = Utils.getDirectionLessNeighbours(node.getKey(), graph).iterator(); it2.hasNext();) {
+                Edge<N> edge = it2.next();
+                if(edge == null){
+                    continue;
+                }
+                //System.out.println(edge.getNode());
+                Vector localVector = Vector.diff(positionVectors.get(edge.getNode()), node.getValue());
+                double dist = Vector.distance(localVector);
+                if (dist == 0) {
+                    node.getValue().add(Vector.getVectorRandomDir(1));
+                    localVector = Vector.diff(positionVectors.get(edge.getNode()), node.getValue());
+                    dist = Vector.distance(localVector);
+                }
+                localVector.scale(1 / dist);
+                localVector.scale(dist * dist / edge.getWeight());//Math.log(graph.size()) *
+                displacement.add(localVector);
+            }
+
+            double dist = Vector.distance(displacement);
+            displacement.scale(dist == 0 ? 0 : 1 / dist);
+            displacement.scale(Math.min(temperature, dist));
+            positionVectors.get(node.getKey()).add(displacement);
+            if (Vector.distance(displacement) > level * 0.01) {
+                flag = false;
+            }
+        }
+        stabilised = flag;
+
+        temperature *= 0.91;
+        //applySprings();
+        //applyRepulsion();
+        //applyFriction();
         //applyGlobalGravitation();
-        update();
+        //update();
         steps++;
     }
-
+    
     /**
      * Applies spring physics to edges.
      */
@@ -118,8 +181,8 @@ public class GraphVisualGenerator<N> extends AbstractVisualGenerator<N> {
                 Vector localVector = Vector.diff(positionVectors.get(vertex.getNode()), node.getValue());
                 Vector resultingForce = new Vector(localVector);
                 resultingForce.normalize();
-                resultingForce.scale(Math.log(graph.size()) * 10 * Math.log(vertex.getWeight()) - Vector.distance(localVector));
-                resultingForce.scale(-0.4);
+                resultingForce.scale(Vector.distance(localVector) - Math.log(graph.size()) * 10 * Math.log(vertex.getWeight()));
+                resultingForce.scale(0.4);
                 acceleration.add(resultingForce);
             }
         }
@@ -147,11 +210,20 @@ public class GraphVisualGenerator<N> extends AbstractVisualGenerator<N> {
         if (node == null) {
             return;
         }
-        if (node.isExternal() || node.getWidth() / Vector.distance(vector, node.getMassCenter()) < tressHold) {
-            Vector localVector = Vector.diff(vector, node.getMassCenter());
-            double repulseX = localVector.getX() == 0 ? 0 : 1 / localVector.getX();
-            double repulseY = localVector.getY() == 0 ? 0 : 1 / localVector.getY();
-            acceleration.add(new Vector(repulseX, repulseY).scale(0.5));
+        Vector localVector = Vector.diff(node.getMassCenter(), vector);
+        double diff = Vector.distance(localVector);
+        if (node.isExternal() || node.getWidth() / diff < tressHold) {
+            localVector.scale(diff == 0 ? 0 : 1 / diff);
+            localVector.scale(-0.2 * 1 * level * level / diff);
+            //System.out.println(localVector);
+            acceleration.add(localVector);
+            /*
+             if (node.isExternal() || node.getWidth() / Vector.distance(vector, node.getMassCenter()) < tressHold) {
+             Vector localVector = Vector.diff(vector, node.getMassCenter());
+             double repulseX = localVector.getX() == 0 ? 0 : 1 / localVector.getX();
+             double repulseY = localVector.getY() == 0 ? 0 : 1 / localVector.getY();
+             acceleration.add(new Vector(repulseX, repulseY).scale(0.5));
+             */
         } else {
             Node[][] temp = node.getSubNodes();
             for (Node[] nodes : temp) {
@@ -275,5 +347,16 @@ public class GraphVisualGenerator<N> extends AbstractVisualGenerator<N> {
     @Override
     public String getName() {
         return "Force-directed Graph Drawing";
+    }
+
+    private Map<N, Vector> getPositionsInGraph(Graph<N> graph, Map<N, Vector> positions) {
+        Map<N, Vector> result = new HashMap();
+        for (Iterator<Entry<N, Vector>> it = positions.entrySet().iterator(); it.hasNext();) {
+            Entry<N, Vector> entry = it.next();
+            if(graph.contains(entry.getKey())){
+                result.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return result;
     }
 }

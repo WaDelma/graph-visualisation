@@ -183,6 +183,11 @@ public class GraphImpl<N> implements Graph<N> {
         }
     }
 
+    @Override
+    public boolean contains(N n) {
+        return nodes.containsKey(n);
+    }
+
     public static class Edge<N> implements Graph.Edge<N> {
 
         private N node;
@@ -319,6 +324,11 @@ public class GraphImpl<N> implements Graph<N> {
                 Entry<N, List<Graph.Edge<N>>> entry = it.next();
                 nodes.put(entry.getKey(), (List) new ArrayDequeList<>(entry.getValue()));
             }
+        }
+
+        @Override
+        public boolean contains(N n) {
+            return GraphImpl.this.contains(n);
         }
     }
 }
