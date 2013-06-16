@@ -91,7 +91,7 @@ public abstract class AbstractCollection<T> implements Collection<T> {
     @Override
     public boolean containsAll(Collection<?> c) {
         for (Iterator it = c.iterator(); it.hasNext();) {
-            if (!contains(it.next())) {
+            if (!contains((T)it.next())) {
                 return false;
             }
         }

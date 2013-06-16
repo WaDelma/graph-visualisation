@@ -5,7 +5,6 @@ import delma.graph.GraphGenerator;
 import delma.graph.GraphImpl;
 import delma.graph.visualisation.UI.UIGraphVisualisation;
 import delma.graph.visualisation.generation.GraphVisualGenerator;
-import delma.graph.visualisation.generation.MultiLevelVisualGenerator;
 import delma.graph.visualisation.generation.VisualGenerator;
 
 /**
@@ -22,17 +21,21 @@ public class GraphVisualisation {
      */
     public static void main(String[] args) {
         instance = new GraphVisualisation();
+        instance.run();
     }
     private Graph<String> graph;
     private UIGraphVisualisation UI;
-    private VisualGenerator visualGenerator;
+    private VisualGenerator<String> visualGenerator;
     private GraphGenerator graphGenerator;
 
     public GraphVisualisation() {
         graph = new GraphImpl<>();
-        visualGenerator = new MultiLevelVisualGenerator(graph);
+        visualGenerator = new GraphVisualGenerator<>(graph);
         graphGenerator = new GraphGenerator(graph);
         UI = new UIGraphVisualisation(graph, visualGenerator, graphGenerator);
+    }
+
+    private void run() {
         UI.create();
     }
 }

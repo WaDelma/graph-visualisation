@@ -32,7 +32,8 @@ public class PanelGraphVisualisation extends JPanel implements ActionListener {
 
     public PanelGraphVisualisation(Graph graph, VisualGenerator generator) {
         this.graph = graph;
-        graphCache = new GraphImpl(this.graph);
+        graphCache = new GraphImpl();
+        graphCache.add(graph);
         this.generator = generator;
         focus = new Vector();
     }
@@ -45,7 +46,7 @@ public class PanelGraphVisualisation extends JPanel implements ActionListener {
         int focusY = (int) (focus.getY() + getHeight() / 2.0);
         g.translate(focusX, focusY);
 
-        
+
         for (Iterator<Entry<Object, List<Edge>>> it = graphCache.iterator(); it.hasNext();) {
             Entry<Object, List<Edge>> cur = it.next();
             Vector fromVector = generator.getCoordinates(cur.getKey());
@@ -62,7 +63,7 @@ public class PanelGraphVisualisation extends JPanel implements ActionListener {
 
             for (Iterator<Edge> it1 = cur.getValue().iterator(); it1.hasNext();) {
                 Edge edge = it1.next();
-                if(edge.getNode() == null){
+                if (edge.getNode() == null) {
                     continue;
                 }
                 if (edge.getNode().equals(cur.getKey())) {
@@ -132,8 +133,12 @@ public class PanelGraphVisualisation extends JPanel implements ActionListener {
         int arrowY = (int) (arrowCoord.getY() * scale);
         arrow.addPoint(arrowX, arrowY);
     }
-
+    
+    /**
+     * Caches the graph.
+     */
     public void cache() {
-        graphCache = new GraphImpl(this.graph);
+        graphCache.clear();
+        graphCache.add(this.graph);
     }
 }

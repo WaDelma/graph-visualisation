@@ -15,9 +15,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
-import java.util.Set;
 
 /**
+ * THIS CLASS IS NOT READY TO USE. FUTURE DEVELOPMENT NEEDED.
+ *
+ * Generates visuals for graph using GraphVisualGenerator from coarsest to
+ * uncoarest level.
  *
  * @author aopkarja
  */
@@ -33,7 +36,7 @@ public class MultiLevelVisualGenerator<N> extends AbstractVisualGenerator<N> {
     public MultiLevelVisualGenerator(Graph<N> graph) {
         multiLevel = new MultiLevel(graph);
         coordinates = new HashMap<>();
-        generators = new ArrayDequeList<>();//GraphVisualGenerator(graph);
+        generators = new ArrayDequeList<>();
         rand = new Random();
     }
 
@@ -41,7 +44,7 @@ public class MultiLevelVisualGenerator<N> extends AbstractVisualGenerator<N> {
     public Vector getCoordinates(N n) {
         Matched matched = multiLevel.getMatched(n);
         for (Matched tempMatched = matched; tempMatched != null; tempMatched = tempMatched.getParent()) {
-            Vector tempVector = coordinates.get(tempMatched);//generator.getCoordinates(tempMatched);
+            Vector tempVector = coordinates.get(tempMatched);
             if (tempVector != null) {
                 return tempVector;
             }
@@ -58,7 +61,6 @@ public class MultiLevelVisualGenerator<N> extends AbstractVisualGenerator<N> {
     public void initialise() {
         coordinates.clear();
         multiLevel.process();
-        //generator.initialise();
         primeGenerators();
         ready = false;
         steps = 0;
@@ -94,15 +96,12 @@ public class MultiLevelVisualGenerator<N> extends AbstractVisualGenerator<N> {
 
     @Override
     public boolean isReady() {
-        return ready;//generator.isReady() && multiLevel.isCoarsest();
+        return ready;
     }
 
     private void primeGenerators() {
         multiLevel.uncoarse();
-        //Graph graph = new GraphImpl();
-        //Map<Object, Vector> coordinates = generator.getCoordinates();
         generators.clear();
-        //Map<Matched, Set> nodes = new HashMap();
         for (Iterator<Matched> it = multiLevel.getRoots().iterator(); it.hasNext();) {
             Matched temp = it.next();
             if (temp == null) {
@@ -111,8 +110,6 @@ public class MultiLevelVisualGenerator<N> extends AbstractVisualGenerator<N> {
             Graph graph;
             if (temp.getN1() == null) {
                 continue;
-                //graph = new GraphImpl();
-                //graph.addNode(temp);
             } else {
                 graph = unravel(temp);
                 for (Iterator<Entry<Matched, List<Edge<Matched>>>> it1 = graph.iterator(); it1.hasNext();) {
@@ -128,17 +125,7 @@ public class MultiLevelVisualGenerator<N> extends AbstractVisualGenerator<N> {
             GraphVisualGenerator generator = new GraphVisualGenerator(graph, coordinates);
             generator.update(graph.size());
             generators.add(generator);
-            //nodes.put(temp.getParent(), graph.getNodes());
-            //graph.add(tempGraph);
         }
-        /*generator.applyGraph(graph);
-         for (Iterator<Entry<Matched, Set>> it = nodes.entrySet().iterator(); it.hasNext();) {
-         Entry<Matched, Set> entry = it.next();
-         if (entry == null || entry.getKey() == null) {
-         continue;
-         }
-         generator.setCoordinates(entry.getValue(), coordinates.get(entry.getKey()), 10);// + entry.getKey().getLevel());
-         }*/
     }
 
     private Graph unravel(Matched matched1) {
@@ -161,12 +148,6 @@ public class MultiLevelVisualGenerator<N> extends AbstractVisualGenerator<N> {
                 stack.push(temp.getNode());
             }
         }
-        /*
-         for (Iterator<Matched> it = result.getNodes().iterator(); it.hasNext();) {
-         Matched matched = it.next();
-         System.out.println(matched + " " + result.getNeighbours(matched));
-         }*/
-        //System.out.println(Arrays.toString(result.getNodes().toArray()));
         return result;
     }
     private double optimisation = 0.4;

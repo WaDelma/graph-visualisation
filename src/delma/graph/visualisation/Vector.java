@@ -10,10 +10,11 @@ import java.util.Random;
 public class Vector {
    
     /**
-     *
+     * New coordinate where vector2 is considered as origo.
+     * 
      * @param vector1
      * @param vector2
-     * @return New coordinate where vector2 is considered as origo
+     * @return 
      */
     public static Vector diff(Vector vector1, Vector vector2) {
         double ax = 0, ay = 0;
@@ -30,19 +31,21 @@ public class Vector {
     }
 
     /**
-     *
+     * Euclidean distance between vector1 and vector2.
+     * 
      * @param vector1
      * @param vector2
-     * @return Euclidean distance between vector1 and vector2
+     * @return 
      */
     public static double distance(Vector vector1, Vector vector2) {
         return distance(vector1.x - vector2.x, vector1.y - vector2.y);
     }
 
     /**
-     *
+     * Euclidean distance between vector and origo.
+     * 
      * @param vector
-     * @return Euclidean distance between vector and origo
+     * @return 
      */
     public static double distance(Vector vector) {
         return distance(vector.x, vector.y);
@@ -52,16 +55,30 @@ public class Vector {
         return Math.sqrt(a * a + b * b);
     }
 
+    /**
+     * Creates mirrored vector.
+     * 
+     * @param c
+     * @return 
+     */
     public static Vector flip(Vector c) {
         return new Vector(-c.x, -c.y);
     }
 
+    /**
+     * Checks equality within delt
+     * 
+     * @param vector1
+     * @param vector2
+     * @param delta
+     * @return 
+     */
     public static boolean equals(Vector vector1, Vector vector2, double delta) {
         return distance(vector1, vector2) < delta;
     }
 
     
-    private static Random rand;
+    private final static Random rand = new Random();
     
     /**
      * Creates vector with distance and random direction
@@ -69,14 +86,10 @@ public class Vector {
      * @param distance
      */
     public static Vector getVectorRandomDir(double distance) {
-        if(rand == null){
-            rand = new Random();
-        }
         return new Vector(distance, 0).rotate(rand.nextDouble() * Constants.TAU);
     }
     
     private double x, y;
-    private static final Vector ORIGO = new Vector();
 
     /**
      * Creates vector to place (x, y)
@@ -218,6 +231,9 @@ public class Vector {
         return "(" + x + ", " + y + ")";
     }
 
+    /**
+     * Sets vector to (0, 0)
+     */
     public void clear() {
         x = 0;
         y = 0;

@@ -41,6 +41,10 @@ public interface VisualGenerator<N> {
      */
     public boolean isReady();
     
+    /**
+     * Name of this generator
+     * @return 
+     */
     public String getName();
 
     public ActionListener getInitialisationListener();

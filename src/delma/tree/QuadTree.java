@@ -77,6 +77,11 @@ public class QuadTree<N> {
         return root.addBody(n, vector, mass);
     }
 
+    /**
+     * Root of this quad tree.
+     *
+     * @return
+     */
     public Node getRoot() {
         return root;
     }
@@ -124,7 +129,7 @@ public class QuadTree<N> {
             }
             return false;
         }
-        
+
         private boolean add(N n, Vector vector, double mass) {
             int quadrantX = vector.getX() < getDivisionX() ? 0 : 1;
             int quadrantY = vector.getY() < getDivisionY() ? 0 : 1;
@@ -154,30 +159,67 @@ public class QuadTree<N> {
             return (max.getY() + min.getY()) / 2;
         }
 
+        /**
+         * Mass of this body or mass of all subbodies.
+         *
+         * @return
+         */
         public double getMass() {
             return mass;
         }
 
+        /**
+         * Center of mass.
+         *
+         * @return
+         */
         public Vector getMassCenter() {
             return center == null ? null : new Vector(center).scale(1 / mass);
         }
 
+        /**
+         * Width of area where this body resides
+         *
+         * @return
+         */
         public double getWidth() {
             return max.getX() - min.getX();
         }
 
+        /**
+         * Height of area where this body resides
+         *
+         * @return
+         */
         public double getHeight() {
             return max.getY() - min.getY();
         }
 
+        /**
+         * Subbodies in 2D array. 0 index means smaller and 1 larger
+         * coordinates.
+         * 
+         *
+         * @return
+         */
         public QuadTree.Node[][] getSubNodes() {
             return subNodes;
         }
 
+        /**
+         * Is this body leaf body?
+         * 
+         * @return 
+         */
         public boolean isExternal() {
             return external;
         }
 
+        /**
+         * Key of the leaf.
+         * 
+         * @return 
+         */
         public N getKey() {
             return n;
         }

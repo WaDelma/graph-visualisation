@@ -63,7 +63,6 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
     public void addFirst(E e) {
         if (isEmpty()) {
             first = last = 0;
-            data = new Object[1];
             data[first] = e;
             empty = false;
             return;
@@ -81,11 +80,11 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
     public void addLast(E e) {
         if (isEmpty()) {
             first = last = 0;
-            data = new Object[1];
             data[last] = e;
             empty = false;
             return;
         }
+
         int i = modData(last + 1);
         if (first == i) {
             ensureCapacity();
@@ -304,13 +303,21 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
 
     private void ensureCapacity() {
         Object[] temp = new Object[data.length * 2];
-        int i = 0;
-        for (Iterator<E> it = this.iterator(); it.hasNext();) {
-            temp[i] = it.next();
-            i++;
+        if (first <= last) {
+            for (int i = first; i <= last; i++) {
+                temp[i - first] = data[i];
+            }
+            last -= first;
+        } else {
+            for (int i = first; i < data.length; i++) {
+                temp[i - first] = data[i];
+            }
+            for (int i = 0; i <= last; i++) {
+                temp[i + data.length - first] = data[i];
+            }
+            last += data.length - first;
         }
         first = 0;
-        last = i == 0 ? 0 : i - 1;
         data = temp;
     }
 
@@ -511,7 +518,7 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
         }
 
         /*
-         * TODO: Implement these
+         * TODO: Not yet implemented
          */
         @Override
         public int previousIndex() {
@@ -528,7 +535,7 @@ public class ArrayDequeList<E> extends AbstractDequeList<E> {
             throw new UnsupportedOperationException("Not supported yet.");
         }
         /*
-         * TODO: Implement these
+         * TODO: Not yet implemented
          */
     }
 }

@@ -1,16 +1,13 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package delma.graph.visualisation.UI.dialog;
 
-import delma.graph.visualisation.UI.dialog.EditorDialog;
 import delma.graph.visualisation.generation.VisualGenerator;
 import java.awt.GridLayout;
 import javax.swing.JFrame;
 
 /**
- *
+ * Dialog for configurating VisualGeneration.
+ * 
  * @author aopkarja
  */
 public class CalculationEditorDialog extends EditorDialog {

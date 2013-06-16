@@ -62,6 +62,9 @@ public class UIGraphVisualisation implements ActionListener {
         frame.repaint();
     }
 
+    /**
+     * Creates the UI.
+     */
     public void create() {
         frame = new JFrame("Graph Visualiser");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -88,7 +91,6 @@ public class UIGraphVisualisation implements ActionListener {
                 createMenuItem(menu, "Generate random graph", "Generates new graph", KeyStroke.getKeyStroke(KeyEvent.VK_G, 0), listener);
 
                 EditorDialog dialog = new GenerationEditorDialog(frame, "Generation configuration", graphGenerator);
-                dialog.addFocusListener(dialog);
                 listener = dialog.getVisibilityToggleListener();
                 createMenuItem(menu, "Configurate random graph generator", "Allows editing how random graph is generated", KeyStroke.getKeyStroke(KeyEvent.VK_G, KeyEvent.CTRL_DOWN_MASK), listener);
 
@@ -103,15 +105,14 @@ public class UIGraphVisualisation implements ActionListener {
                 ActionListener listener = new ListenInSequence(visualGenerator.getStepListener(), this);
                 createMenuItem(menu, "Step", "Step in iteration", KeyStroke.getKeyStroke(KeyEvent.VK_S, 0), listener);
 
-                
-                listener = new Repeat(listener, 1, visualGenerator.getStepChecker(), true);
+
+                listener = new Repeat(listener, 1, true, visualGenerator.getStepChecker());
                 createMenuItem(menu, "Calculate", "Iterate until equilibrium", KeyStroke.getKeyStroke(KeyEvent.VK_C, 0), listener);
 
                 EditorDialog dialog = new CalculationEditorDialog(frame, "Calculation configuration", visualGenerator);
-                dialog.addFocusListener(dialog);
                 listener = dialog.getVisibilityToggleListener();
                 createMenuItem(menu, "Configurate visual calculation", "Allows editing how graph visual is calculated", KeyStroke.getKeyStroke(KeyEvent.VK_C, KeyEvent.CTRL_DOWN_MASK), listener);
-                
+
             }
             menuBar.add(menu);
 
@@ -153,21 +154,21 @@ public class UIGraphVisualisation implements ActionListener {
     }
 
     /**
-     * Allows repeating of actions
+     * Allows repeating of actions.
      */
     private static class Repeat implements ActionListener {
 
         private final ActionListener listener;
         private final int time;
         private final boolean toggle;
-        private final Requirement req;
+        private final Requirement[] requirements;
         private volatile boolean active;
 
-        public Repeat(ActionListener listener, int time, Requirement req, boolean toggle) {
+        public Repeat(ActionListener listener, int time, boolean toggle, Requirement... req) {
             this.listener = listener;
             this.time = time;
             this.toggle = toggle;
-            this.req = req;
+            this.requirements = req;
         }
 
         @Override
@@ -182,7 +183,13 @@ public class UIGraphVisualisation implements ActionListener {
                 @Override
                 public void run() {
                     active = true;
-                    while (active && req.check()) {
+                    loop:
+                    while (active) {
+                        for (Requirement req : requirements) {
+                            if (!req.check()) {
+                                break loop;
+                            }
+                        }
                         listener.actionPerformed(e);
                         if (time > 0) {
                             try {
@@ -200,8 +207,16 @@ public class UIGraphVisualisation implements ActionListener {
         }
     }
 
+    /**
+     * Requirement for Repeat
+     */
     public static interface Requirement {
 
+        /**
+         * If true is returned repeating contínues.
+         *
+         * @return
+         */
         public boolean check();
     }
 }

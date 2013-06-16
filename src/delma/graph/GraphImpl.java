@@ -31,18 +31,6 @@ public class GraphImpl<N> implements Graph<N> {
         rand = new Random();
     }
 
-    public GraphImpl(Graph<N> graph) {
-        this();
-        for (Iterator<Map.Entry<N, List<Graph.Edge<N>>>> it = graph.iterator(); it.hasNext();) {
-            Entry<N, List<Graph.Edge<N>>> entry = it.next();
-            nodes.put(entry.getKey(), (List) new ArrayDequeList<>(entry.getValue()));
-        }
-        for (Iterator<Map.Entry<N, List<Graph.Edge<N>>>> it = graph.getTranspose().iterator(); it.hasNext();) {
-            Entry<N, List<Graph.Edge<N>>> entry = it.next();
-            transpose.put(entry.getKey(), (List) new ArrayDequeList<>(entry.getValue()));
-        }
-    }
-
     @Override
     public List<Graph.Edge<N>> getNeighbours(N node) {
         return internalGetNeighbours(node, nodes);
@@ -175,11 +163,11 @@ public class GraphImpl<N> implements Graph<N> {
     public void add(Graph graph) {
         for (Iterator<Map.Entry<N, List<Graph.Edge<N>>>> it = graph.iterator(); it.hasNext();) {
             Entry<N, List<Graph.Edge<N>>> entry = it.next();
-            nodes.put(entry.getKey(), (List) new ArrayDequeList<>(entry.getValue()));
+            nodes.put(entry.getKey(), (List<Graph.Edge<N>>) new ArrayDequeList<>(entry.getValue()));
         }
         for (Iterator<Map.Entry<N, List<Graph.Edge<N>>>> it = graph.getTranspose().iterator(); it.hasNext();) {
             Entry<N, List<Graph.Edge<N>>> entry = it.next();
-            transpose.put(entry.getKey(), (List) new ArrayDequeList<>(entry.getValue()));
+            transpose.put(entry.getKey(), (List<Graph.Edge<N>>) new ArrayDequeList<>(entry.getValue()));
         }
     }
 
@@ -318,11 +306,11 @@ public class GraphImpl<N> implements Graph<N> {
         public void add(Graph graph) {
             for (Iterator<Map.Entry<N, List<Graph.Edge<N>>>> it = graph.iterator(); it.hasNext();) {
                 Entry<N, List<Graph.Edge<N>>> entry = it.next();
-                transpose.put(entry.getKey(), (List) new ArrayDequeList<>(entry.getValue()));
+                transpose.put(entry.getKey(), (List<Edge<N>>) new ArrayDequeList<>(entry.getValue()));
             }
             for (Iterator<Map.Entry<N, List<Graph.Edge<N>>>> it = graph.getTranspose().iterator(); it.hasNext();) {
                 Entry<N, List<Graph.Edge<N>>> entry = it.next();
-                nodes.put(entry.getKey(), (List) new ArrayDequeList<>(entry.getValue()));
+                nodes.put(entry.getKey(), (List<Edge<N>>) new ArrayDequeList<>(entry.getValue()));
             }
         }
 

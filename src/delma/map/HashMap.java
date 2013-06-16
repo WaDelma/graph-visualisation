@@ -6,7 +6,6 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Random;
 import java.util.Set;
 
 /**
@@ -21,7 +20,6 @@ public class HashMap<K, V> implements Map<K, V> {
     private double load;
     private final static double DEFAULT_LOAD_FACTOR = 0.66;
     private final static int DEFAULT_STARTING_SIZE = 64;
-    private final int hashSeed;
 
     /**
      * Create new one with custom load factor.
@@ -34,13 +32,11 @@ public class HashMap<K, V> implements Map<K, V> {
         }
         load = loadFactor;
         data = new Entry[DEFAULT_STARTING_SIZE];
-        hashSeed = new Random().nextInt();
     }
 
     public HashMap(Map<K, V> map) {
         load = DEFAULT_LOAD_FACTOR;
         data = new Entry[nextExponentialOfTwo(map.size() + map.size() * load)];
-        hashSeed = new Random().nextInt();
         for (Iterator<Map.Entry<K, V>> it = map.entrySet().iterator(); it.hasNext();) {
             Map.Entry<K, V> entry = it.next();
             internalPut(entry.getKey(), entry.getValue());
@@ -113,7 +109,7 @@ public class HashMap<K, V> implements Map<K, V> {
             }
         }
         size++;
-        data[hash] = new Entry(key, value, data[hash]);
+        data[hash] = new Entry<>(key, value, data[hash]);
         return null;
     }
 
@@ -193,8 +189,8 @@ public class HashMap<K, V> implements Map<K, V> {
             Map.Entry entry = it.next();
             builder.append("(");
             builder.append(entry.getKey());
-            //builder.append(", ");
-            //builder.append(entry.getValue());
+            builder.append(", ");
+            builder.append(entry.getValue());
             builder.append(")");
             builder.append(", ");
         }
@@ -235,6 +231,7 @@ public class HashMap<K, V> implements Map<K, V> {
             if (next == null) {
                 throw new NoSuchElementException();
             }
+            @SuppressWarnings("unchecked")
             Entry<K, V> result = next;
             cur = next;
             next = next.next;
@@ -311,7 +308,7 @@ public class HashMap<K, V> implements Map<K, V> {
 
         @Override
         public boolean contains(Object o) {
-            return containsValue((V) o);
+            return containsValue((V)o);
         }
 
         @Override
@@ -349,9 +346,9 @@ public class HashMap<K, V> implements Map<K, V> {
             if (!(o instanceof Map.Entry)) {
                 return false;
             }
+            
             Entry<K, V> entry = (Entry<K, V>) o;
-            V result = get(entry.key);
-            return result != null && entry.value.equals(result);
+            return entry.value.equals(get(entry.key));
         }
 
         @Override
@@ -383,7 +380,7 @@ public class HashMap<K, V> implements Map<K, V> {
 
         @Override
         public boolean contains(Object o) {
-            return containsKey((K) o);
+            return containsKey((K)o);
         }
 
         @Override
@@ -398,7 +395,7 @@ public class HashMap<K, V> implements Map<K, V> {
 
         @Override
         public boolean remove(Object o) {
-            return HashMap.this.remove((K) o) != null;
+            return HashMap.this.remove((K)o) != null;
         }
     }
 
@@ -412,9 +409,9 @@ public class HashMap<K, V> implements Map<K, V> {
 
         private final K key;
         private V value;
-        private Entry next;
+        private Entry<K, V> next;
 
-        private Entry(K key, V value, Entry next) {
+        private Entry(K key, V value, Entry<K, V> next) {
             this.key = key;
             this.value = value;
             this.next = next;

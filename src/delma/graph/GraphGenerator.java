@@ -1,6 +1,5 @@
 package delma.graph;
 
-import delma.graph.Graph;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -26,7 +25,7 @@ public class GraphGenerator implements ActionListener {
      * @param edges How many vertices there will be
      * @param maxWeight How large weight can be
      */
-    public static void generate(Graph graph, int nodes, double edges, int maxWeight) {
+    public static void generate(Graph<String> graph, int nodes, double edges, int maxWeight) {
         graph.clear();
         Random rand = new Random();
         for (int i = 0; i < nodes; i++) {
@@ -36,14 +35,18 @@ public class GraphGenerator implements ActionListener {
             }
         }
         for (int i = 0; i < edges; i++) {
-            Object node1 = graph.randomNode();
-            Object node2 = graph.randomNode();
+            String node1 = graph.randomNode();
+            String node2 = graph.randomNode();
             graph.addEdge(node1, node2, rand.nextInt(maxWeight) + 1);
         }
     }
-    private final Graph graph;
+    private final Graph<String> graph;
 
-    public GraphGenerator(Graph graph) {
+    /**
+     * Create graph generator for ActionLister
+     * @param graph 
+     */
+    public GraphGenerator(Graph<String> graph) {
         this.graph = graph;
     }
 

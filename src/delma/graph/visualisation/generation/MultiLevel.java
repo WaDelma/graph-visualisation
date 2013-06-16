@@ -4,20 +4,19 @@ import delma.dequelist.ArrayDequeList;
 import delma.dequelist.DequeList;
 import delma.graph.Graph;
 import delma.graph.Graph.Edge;
-import delma.graph.GraphImpl;
 import delma.map.HashMap;
 import delma.utils.Utils;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 
 /**
- *
+ * THIS CLASS IS NOT READY TO USE. FUTURE DEVELOPMENT NEEDED.
+ * 
+ * Coarses given graph to it's simplest stage and allows uncoarsing it.
+ * 
  * @author aopkarja
  */
 public class MultiLevel<N> {
@@ -28,7 +27,6 @@ public class MultiLevel<N> {
     private Map<Object, Matched> fromKeyToMatched;
     private List<Matched> matchedGraph;
     private boolean uncoarsest;
-    private static final Object DUMMY = new Object();
 
     public boolean isUncoarsest() {
         return uncoarsest;
@@ -198,11 +196,6 @@ public class MultiLevel<N> {
             for (Iterator<Edge> it1 = matched1.getNeighbours().iterator(); it1.hasNext();) {
                 Edge edge = it1.next();
                 Matched tempMatched = map.get(edge.getNode());
-                //Remove self pointing edges
-                /*if (matched1.equals(tempMatched)) {
-                    it1.remove();
-                    continue;
-                }*/
                 if (tempMatched == null) {
                     continue;
                 }
@@ -284,10 +277,10 @@ public class MultiLevel<N> {
                 return false;
             }
             final Matched<N> other = (Matched<N>) obj;
-            if (this.n0 != other.n0) {//!Objects.equals(this.n0, other.n0)) {
+            if (this.n0 != other.n0) {
                 return false;
             }
-            if (this.n1 != other.n1) { //!Objects.equals(this.n1, other.n1)) {
+            if (this.n1 != other.n1) {
                 return false;
             }
             return this.level == other.level;
@@ -303,7 +296,7 @@ public class MultiLevel<N> {
                 string += "|" + Utils.toString(n1);
             }
             String temp = neighbours == null ? null : neighbours.toString();
-            return "[" + string + "]" + level;// + "=" + temp;
+            return "[" + string + "]" + level + "=" + temp;
 //            if (n1 == null) {
 //                return "" + n0;
 //            }
